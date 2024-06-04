@@ -28,5 +28,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |-
           echo 'GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}}' > .release-env
+      - name: update cgo flags
+        run: export CGO_CFLAGS="-O -D__BLST_PORTABLE__"
+      - name: update cgo flags allow
+        run: export CGO_CFLAGS_ALLOW="-O -D__BLST_PORTABLE__"
       - name: release publish
         run: make release
