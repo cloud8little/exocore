@@ -11,6 +11,7 @@ on:
 env:
   CGO_CFLAGS: "-O -D__BLST_PORTABLE__"
   CGO_CFLAGS_ALLOW: "-O -D__BLST_PORTABLE__"
+  
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
@@ -29,6 +30,8 @@ jobs:
       - name: setup release environment
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CGO_CFLAGS: "-O -D__BLST_PORTABLE__"
+          CGO_CFLAGS_ALLOW: "-O -D__BLST_PORTABLE__"
         run: |-
           echo 'GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}}' > .release-env
       - name: release publish
