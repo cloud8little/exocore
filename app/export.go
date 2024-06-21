@@ -55,7 +55,8 @@ func (app *ExocoreApp) ExportAppStateAndValidators(
 ) (servertypes.ExportedApp, error) {
 	// Creates context with current height and checks txs for ctx to be usable by start of next
 	// block
-	ctx := app.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
+	ctx := app.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()}).
+		WithChainID(app.ChainID())
 
 	// We export at last height + 1, because that's the height at which
 	// Tendermint will start InitChain.
@@ -74,14 +75,13 @@ func (app *ExocoreApp) ExportAppStateAndValidators(
 		return servertypes.ExportedApp{}, err
 	}
 
-	validators, err := app.StakingKeeper.WriteValidators(ctx)
-	if err != nil {
-		return servertypes.ExportedApp{}, err
-	}
+	// the x/dogfood validator set is exported in its `val_set` key, and hence,
+	// does not need to be part of the app export. in other words, we do not
+	// duplicate the exported validator set. besides, as far as i can tell, the
+	// SDK does not use the Validators member of the ExportedApp struct.
 
 	return servertypes.ExportedApp{
 		AppState:        appState,
-		Validators:      validators,
 		Height:          height,
 		ConsensusParams: app.BaseApp.GetConsensusParams(ctx),
 	}, nil

@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/ExocoreNetwork/exocore/x/dogfood/types"
+	epochstypes "github.com/ExocoreNetwork/exocore/x/epochs/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	epochstypes "github.com/evmos/evmos/v14/x/epochs/types"
 )
 
 // EpochsHooksWrapper is the wrapper structure that implements the epochs hooks for the dogfood
@@ -37,6 +37,9 @@ func (wrapper EpochsHooksWrapper) AfterEpochEnd(
 		// find the opt outs that mature when this epoch ends, and move them to pending.
 		optOuts := wrapper.keeper.GetOptOutsToFinish(ctx, epoch)
 		wrapper.keeper.SetPendingOptOuts(ctx, types.AccountAddresses{List: optOuts})
+		for _, addr := range optOuts {
+			wrapper.keeper.DeleteOperatorOptOutFinishEpoch(ctx, addr)
+		}
 		wrapper.keeper.ClearOptOutsToFinish(ctx, epoch)
 		// next, find the consensus addresses that are to be pruned, and move them to pending.
 		consAddresses := wrapper.keeper.GetConsensusAddrsToPrune(ctx, epoch)

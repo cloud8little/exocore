@@ -199,9 +199,9 @@ import (
 	recoverykeeper "github.com/evmos/evmos/v14/x/recovery/keeper"
 	recoverytypes "github.com/evmos/evmos/v14/x/recovery/types"
 
-	"github.com/evmos/evmos/v14/x/epochs"
-	epochskeeper "github.com/evmos/evmos/v14/x/epochs/keeper"
-	epochstypes "github.com/evmos/evmos/v14/x/epochs/types"
+	"github.com/ExocoreNetwork/exocore/x/epochs"
+	epochskeeper "github.com/ExocoreNetwork/exocore/x/epochs/keeper"
+	epochstypes "github.com/ExocoreNetwork/exocore/x/epochs/types"
 
 	"github.com/evmos/evmos/v14/x/erc20"
 	erc20keeper "github.com/evmos/evmos/v14/x/erc20/keeper"
@@ -591,6 +591,10 @@ func NewExocoreApp(
 		app.AssetsKeeper,     // assets for vote power
 	)
 
+	(&app.OperatorKeeper).SetHooks(
+		app.StakingKeeper.OperatorHooks(),
+	)
+
 	(&app.EpochsKeeper).SetHooks(
 		app.StakingKeeper.EpochsHooks(),
 	)
@@ -939,12 +943,12 @@ func NewExocoreApp(
 
 	app.mm.SetOrderEndBlockers(
 		capabilitytypes.ModuleName,
-		crisistypes.ModuleName, // easy quit
-		stakingtypes.ModuleName,
-		operatorTypes.ModuleName,   // after staking keeper
-		delegationTypes.ModuleName, // after operator keeper
+		crisistypes.ModuleName,     // easy quit
+		operatorTypes.ModuleName,   // first, so that USD value is recorded
+		stakingtypes.ModuleName,    // uses the USD value recorded in operator to calculate vote power
+		delegationTypes.ModuleName, // process the undelegations matured by dogfood
 		govtypes.ModuleName,        // after staking keeper to ensure new vote powers
-		oracleTypes.ModuleName,     // after staking keeper to ensure new vote powers
+		oracleTypes.ModuleName,     // prepares for next round with new vote powers from staking keeper
 		evmtypes.ModuleName,        // can be anywhere
 		feegrant.ModuleName,        // can be anywhere
 		// no-op modules

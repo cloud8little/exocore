@@ -32,7 +32,6 @@ func init() {
 // prefix bytes for the reStaking assets manage store
 const (
 	prefixClientChainInfo = iota + 1
-	prefixAppChainInfo
 	prefixRestakingAssetInfo
 	prefixRestakerAssetInfo
 	prefixOperatorAssetInfo
@@ -49,8 +48,6 @@ const (
 var (
 	// KeyPrefixClientChainInfo key->value: chainIndex->ClientChainInfo
 	KeyPrefixClientChainInfo = []byte{prefixClientChainInfo}
-
-	KeyPrefixAppChainInfo = []byte{prefixAppChainInfo}
 
 	// KeyPrefixReStakingAssetInfo AssetID = AssetAddr+'_'+chainIndex
 	// KeyPrefixReStakingAssetInfo key->value: AssetID-> StakingAssetInfo
@@ -127,9 +124,8 @@ func ParseID(key string) (string, uint64, error) {
 	return keys[0], id, nil
 }
 
-func ValidateID(key string, validateEth bool) (string, uint64, error) {
-	// check lowercase
-	if key != strings.ToLower(key) {
+func ValidateID(key string, checkLowercase bool, validateEth bool) (string, uint64, error) {
+	if checkLowercase && key != strings.ToLower(key) {
 		return "", 0, errorsmod.Wrapf(ErrParseAssetsStateKey, "ID not lowercase: %s", key)
 	}
 	// parse it
