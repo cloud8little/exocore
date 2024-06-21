@@ -3,10 +3,12 @@ package cli
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	errorsmod "cosmossdk.io/errors"
 	"github.com/ExocoreNetwork/exocore/x/assets/types"
 	delegationtype "github.com/ExocoreNetwork/exocore/x/delegation/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -26,6 +28,7 @@ func GetQueryCmd() *cobra.Command {
 	cmd.AddCommand(
 		QuerySingleDelegationInfo(),
 		QueryDelegationInfo(),
+		QueryUndelegationHoldCount(),
 	)
 	return cmd
 }
@@ -49,10 +52,14 @@ func QuerySingleDelegationInfo() *cobra.Command {
 				return errorsmod.Wrap(types.ErrInvalidCliCmdArg, err.Error())
 			}
 			stakerID, assetID := types.GetStakeIDAndAssetIDFromStr(clientChainLzID, args[1], args[2])
+			accAddr, err := sdk.AccAddressFromBech32(args[3])
+			if err != nil {
+				return errorsmod.Wrap(types.ErrInvalidCliCmdArg, err.Error())
+			}
 			req := &delegationtype.SingleDelegationInfoReq{
-				StakerID:     stakerID,
-				AssetID:      assetID,
-				OperatorAddr: args[3],
+				StakerID:     stakerID,         // already lowercase
+				AssetID:      assetID,          // already lowercase
+				OperatorAddr: accAddr.String(), // already lowercase
 			}
 			res, err := queryClient.QuerySingleDelegationInfo(context.Background(), req)
 			if err != nil {
@@ -78,13 +85,49 @@ func QueryDelegationInfo() *cobra.Command {
 			if err != nil {
 				return err
 			}
-
+			stakerID := strings.ToLower(args[0])
+			if _, _, err := types.ValidateID(stakerID, false, false); err != nil {
+				return errorsmod.Wrap(types.ErrInvalidCliCmdArg, err.Error())
+			}
+			assetID := strings.ToLower(args[1])
+			if _, _, err := types.ValidateID(assetID, false, false); err != nil {
+				return errorsmod.Wrap(types.ErrInvalidCliCmdArg, err.Error())
+			}
 			queryClient := delegationtype.NewQueryClient(clientCtx)
 			req := &delegationtype.DelegationInfoReq{
-				StakerID: args[0],
-				AssetID:  args[1],
+				StakerID: strings.ToLower(stakerID),
+				AssetID:  strings.ToLower(assetID),
 			}
 			res, err := queryClient.QueryDelegationInfo(context.Background(), req)
+			if err != nil {
+				return err
+			}
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// QueryUndelegationHoldCount queries undelegation hold count for a record key.
+func QueryUndelegationHoldCount() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "QueryUndelegationHoldCount recordKey",
+		Short: "Get undelegation hold count",
+		Long:  "Get undelegation hold count",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := delegationtype.NewQueryClient(clientCtx)
+			req := &delegationtype.UndelegationHoldCountReq{
+				RecordKey: strings.ToLower(args[0]),
+			}
+			res, err := queryClient.QueryUndelegationHoldCount(context.Background(), req)
 			if err != nil {
 				return err
 			}
