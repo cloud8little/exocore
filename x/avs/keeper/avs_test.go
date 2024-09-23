@@ -56,6 +56,7 @@ func (suite *AVSTestSuite) TestAVS() {
 	suite.Equal(found, true)
 	suite.Equal(epoch.CurrentEpoch, int64(2))
 	suite.CommitAfter(48*time.Hour + time.Nanosecond)
+	suite.Equal(1,1)
 }
 
 func (suite *AVSTestSuite) TestUpdateAVSInfo_Register() {
