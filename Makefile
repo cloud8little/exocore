@@ -344,6 +344,7 @@ test-rpc:
 
 test-rpc-pending:
 	./scripts/integration-test-all.sh -t "pending" -q 1 -z 1 -s 2 -m "pending" -r "true"
+	
 test-sanity:
     ./scripts/sanity-check.sh	
 
