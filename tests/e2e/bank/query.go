@@ -5,7 +5,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func (s *E2ETestSuite) TestQeuryBalance() {
+// TestQueryBalance verifies that the native coin balance query returns the expected
+// account balance for validators. It checks that:
+// - The balance matches the network configuration
+// - The returned coin denomination and amount are correct
+// - The balance can be properly parsed into a native coin
+func (s *E2ETestSuite) TestQueryBalance() {
 	res, err := e2e.QueryNativeCoinBalance(s.network.Validators[0].Address, s.network)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewCoin(s.network.Config.NativeDenom, s.network.Config.AccountTokens), *res.Balance)

@@ -10,8 +10,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const layout = "2006-01-02 15:04:05"
-
 /*
 	cases:
 	  we need more than 2/3 power, so that at least 3 out of 4 validators power should be enough
@@ -136,14 +134,6 @@ func (s *E2ETestSuite) TestCreatePriceLST() {
 
 	// case_4.
 	// update timestamp
-	//	priceTest1R4 := price2.updateTimestamp()
-	//	priceTimeDetID2R3 := priceTest2R3.getPriceTimeDetID("10")
-	//	priceSource2R3 := oracletypes.PriceSource{
-	//		SourceID: 1,
-	//		Prices: []*oracletypes.PriceTimeDetID{
-	//			&priceTimeDetID2R3,
-	//		},
-	//	}
 	s.moveToAndCheck(40)
 	priceTest1R4, priceSource1R4 := price1.generateRealTimeStructs("12", 1)
 	msg0 = oracletypes.NewMsgCreatePrice(creator0.String(), 1, []*oracletypes.PriceSource{&priceSource1R4}, 40, 1)
@@ -160,7 +150,6 @@ func (s *E2ETestSuite) TestCreatePriceLST() {
 	s.Require().NoError(err)
 	// price updated, round 4 has price{p1}
 	s.Require().Equal(priceTest1R4.getPriceTimeRound(4), res.Price)
-
 }
 
 func (s *E2ETestSuite) TestCreatePriceNST() {

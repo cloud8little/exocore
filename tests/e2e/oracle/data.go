@@ -6,6 +6,8 @@ import (
 	oracletypes "github.com/ExocoreNetwork/exocore/x/oracle/types"
 )
 
+const layout = "2006-01-02 15:04:05"
+
 type priceTime struct {
 	Price     string
 	Decimal   int32
@@ -39,7 +41,7 @@ func (p priceTime) generateRealTimeStructs(detID string, sourceID uint64) (price
 	retP := p.updateTimestamp()
 	pTimeDetID := retP.getPriceTimeDetID(detID)
 	return retP, oracletypes.PriceSource{
-		SourceID: 1,
+		SourceID: sourceID,
 		Prices: []*oracletypes.PriceTimeDetID{
 			&pTimeDetID,
 		},

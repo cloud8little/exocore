@@ -16,7 +16,6 @@ import (
 	"testing"
 	"time"
 
-	"cosmossdk.io/math"
 	sdkmath "cosmossdk.io/math"
 	dbm "github.com/cometbft/cometbft-db"
 	tmcfg "github.com/cometbft/cometbft/config"
@@ -82,11 +81,11 @@ type Config struct {
 	AppConstructor    AppConstructor      // the ABCI application constructor
 	GenesisState      simapp.GenesisState // custom gensis state to provide
 	TimeoutCommit     time.Duration       // the consensus commitment timeout
-	AccountTokens     math.Int            // the amount of system tokens(e.g. 1000hua)
-	DepositedTokens   math.Int
-	StakingTokens     math.Int // the amount of tokens each validator stakes for every supporte asset
-	NumValidators     int      // the total number of validators to create and bond
-	ChainID           string   // the network chain-id
+	AccountTokens     sdkmath.Int         // the amount of system tokens(e.g. 1000hua)
+	DepositedTokens   sdkmath.Int
+	StakingTokens     sdkmath.Int // the amount of tokens each validator stakes for every supporte asset
+	NumValidators     int         // the total number of validators to create and bond
+	ChainID           string      // the network chain-id
 	// BondDenom         string   // the staking bond denomination
 	NativeDenom     string // denomination for native token
 	MinGasPrices    string // the minimum gas prices each validator will accept

@@ -12,6 +12,8 @@ import (
 )
 
 var (
+	// SupportedAlgorithms is intended for testing purposes only.
+	// WARNING: Ed25519 keys must not be used in SDK apps except in a Tendermint validator context.
 	SupportedAlgorithms = keyring.SigningAlgoList{evmoshd.EthSecp256k1, hd.Secp256k1, Ed25519}
 	Ed25519             = ed25519Algo{}
 )
@@ -36,6 +38,9 @@ func (e ed25519Algo) Derive() hd.DeriveFn {
 // Generate will be used to import privateKey from hex through keyring, so we just return the bz as privateKey instead of seed
 func (e ed25519Algo) Generate() hd.GenerateFn {
 	return func(bz []byte) cryptotypes.PrivKey {
+		if len(bz) != cryptoed25519.PrivateKeySize {
+			panic("invalid ed25519 private key size")
+		}
 		return &ed25519.PrivKey{
 			Key: cryptoed25519.PrivateKey(bz),
 		}

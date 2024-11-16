@@ -2,7 +2,6 @@ package network
 
 import (
 	"context"
-	"fmt"
 
 	sdkmath "cosmossdk.io/math"
 	ctypes "github.com/cometbft/cometbft/rpc/core/types"
@@ -26,7 +25,6 @@ func (n *Network) genSignedTxInternal(msgs []sdk.Msg, keyName string, kr keyring
 	val := n.Validators[0]
 	ctx := val.ClientCtx
 
-	// record, err := ctx.Keyring.Key(keyName)
 	record, err := kr.Key(keyName)
 	if err != nil {
 		return nil, err
@@ -41,13 +39,17 @@ func (n *Network) genSignedTxInternal(msgs []sdk.Msg, keyName string, kr keyring
 	if err = txBuilder.SetMsgs(msgs...); err != nil {
 		return nil, err
 	}
-	txBytes, _ := txConfig.TxEncoder()(txBuilder.GetTx())
+	txBytes, err := txConfig.TxEncoder()(txBuilder.GetTx())
+	if err != nil {
+		return nil, err
+	}
 	// simulate tx to get estimate gasLimit
 	gasInfo, err := txClient.Simulate(context.Background(), &sdktx.SimulateRequest{
 		TxBytes: txBytes,
 	})
-	fmt.Println("debug--err", err)
-
+	if err != nil {
+		return nil, err
+	}
 	// adjustment
 	gasLimit := uint64(float64(gasInfo.GasInfo.GasUsed) * 1.5)
 	gasLimitInt := sdkmath.NewIntFromUint64(gasLimit)
@@ -56,9 +58,6 @@ func (n *Network) genSignedTxInternal(msgs []sdk.Msg, keyName string, kr keyring
 	if l > 0 {
 		minGasPriceStr := n.Config.MinGasPrices[:l]
 		minGasPrice, _ := sdkmath.NewIntFromString(minGasPriceStr)
-		if err != nil {
-			return nil, err
-		}
 		fee = gasLimitInt.Mul(minGasPrice)
 	}
 
@@ -70,7 +69,6 @@ func (n *Network) genSignedTxInternal(msgs []sdk.Msg, keyName string, kr keyring
 	}
 	txf := tx.Factory{}.
 		WithChainID(ctx.ChainID).
-		// WithKeybase(ctx.Keyring).
 		WithKeybase(kr).
 		WithTxConfig(txConfig).
 		WithAccountNumber(num).

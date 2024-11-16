@@ -15,7 +15,6 @@ import (
 	"github.com/cometbft/cometbft/rpc/client/local"
 	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	assetstypes "github.com/ExocoreNetwork/exocore/x/assets/types"
@@ -41,6 +40,8 @@ import (
 	evmtypes "github.com/evmos/evmos/v16/x/evm/types"
 	feemarkettypes "github.com/evmos/evmos/v16/x/feemarket/types"
 )
+
+const MaxOptedOutHeight uint64 = 18446744073709551615
 
 func startInProcess(cfg Config, val *Validator) error {
 	logger := val.Ctx.Logger
@@ -176,9 +177,6 @@ func initGenFiles(cfg Config, genAccounts []authtypes.GenesisAccount, genBalance
 	if l > 0 {
 		minGasPriceStr := cfg.MinGasPrices[:l]
 		minGasPrice, _ = sdkmath.NewIntFromString(minGasPriceStr)
-		if err != nil {
-			return err
-		}
 	}
 	feemarketGenState.Params.BaseFee = minGasPrice
 	cfg.GenesisState[feemarkettypes.ModuleName] = cfg.Codec.MustMarshalJSON(&feemarketGenState)
@@ -291,7 +289,7 @@ func WriteFile(name string, dir string, contents []byte) error {
 // The NewGenState.. is mainlly used for validatorset related config
 
 // set deposits and operator_assets for assets genesisState
-func NewGenStateAssets(operatorAccAddresses []sdktypes.AccAddress, depositAmount, stakingAmount sdkmath.Int) (assetstypes.GenesisState, error) {
+func NewGenStateAssets(operatorAccAddresses []sdk.AccAddress, depositAmount, stakingAmount sdkmath.Int) (assetstypes.GenesisState, error) {
 	if stakingAmount.GT(depositAmount) {
 		return DefaultGenStateAssets, fmt.Errorf("stakingAmount %v should be less than depositAmount %v", stakingAmount, depositAmount)
 	}
@@ -353,7 +351,7 @@ func NewGenStateAssets(operatorAccAddresses []sdktypes.AccAddress, depositAmount
 // each operator opts in every avs
 // each operator deposited and self staked all assets with: (depsitAmount, stakingAmount)
 // initial price for every asset is 1 USD
-func NewGenStateOperator(operatorAccAddresses []sdktypes.AccAddress, consPubKeys []string, commissionRate sdkmath.LegacyDec, chainID string, optedAVSAddresses []string, stakingAmount sdkmath.Int, genStateAssets assetstypes.GenesisState) (operatortypes.GenesisState, error) {
+func NewGenStateOperator(operatorAccAddresses []sdk.AccAddress, consPubKeys []string, commissionRate sdkmath.LegacyDec, chainID string, optedAVSAddresses []string, stakingAmount sdkmath.Int, genStateAssets assetstypes.GenesisState) (operatortypes.GenesisState, error) {
 	// total stakingAmount one operator holds among all assets
 	stakingAmount = stakingAmount.Mul(sdkmath.NewInt(int64(len(genStateAssets.Tokens))))
 	if len(operatorAccAddresses) != len(consPubKeys) {
@@ -399,7 +397,7 @@ func NewGenStateOperator(operatorAccAddresses []sdktypes.AccAddress, consPubKeys
 			})
 			// OperatorUSDValues
 			// the price unit of assets is 1 not decimal 18
-			stakingValue := sdktypes.TokensToConsensusPower(stakingAmount, evmostypes.PowerReduction)
+			stakingValue := sdk.TokensToConsensusPower(stakingAmount, evmostypes.PowerReduction)
 			DefaultGenStateOperator.OperatorUSDValues = append(DefaultGenStateOperator.OperatorUSDValues, operatortypes.OperatorUSDValue{
 				Key: AVSAddress + "/" + operatorAccAddress.String(),
 				OptedUSDValue: operatortypes.OperatorOptedUSDValue{
@@ -416,7 +414,7 @@ func NewGenStateOperator(operatorAccAddresses []sdktypes.AccAddress, consPubKeys
 			AVSAddr: AVSAddress,
 			Value: operatortypes.DecValueField{
 				// the price unit of assets is 1 not decimal 18
-				Amount: sdkmath.LegacyNewDec(sdktypes.TokensToConsensusPower(totalStakingAmount, evmostypes.PowerReduction)),
+				Amount: sdkmath.LegacyNewDec(sdk.TokensToConsensusPower(totalStakingAmount, evmostypes.PowerReduction)),
 			},
 		})
 	}
@@ -427,7 +425,7 @@ func NewGenStateOperator(operatorAccAddresses []sdktypes.AccAddress, consPubKeys
 // stakingAmount is the amount each operator have for every single asset defined in assets module, so for a single operator the total stakingAmount they have is stakingAmount*count(assets)
 // assets genesis state is required as input argument to provide assets information. It should be called with NewGenStateAssets to update default assets genesis state for test
 func NewGenStateDogfood(consPubKeys []string, stakingAmount sdkmath.Int, genStateAssets assetstypes.GenesisState) (dogfoodtypes.GenesisState, error) {
-	power := sdktypes.TokensToConsensusPower(stakingAmount.Mul(sdkmath.NewInt(int64(len(genStateAssets.Tokens)))), evmostypes.PowerReduction)
+	power := sdk.TokensToConsensusPower(stakingAmount.Mul(sdkmath.NewInt(int64(len(genStateAssets.Tokens)))), evmostypes.PowerReduction)
 	DefaultGenStateDogfood.Params.EpochIdentifier = "minute"
 	DefaultGenStateDogfood.Params.EpochsUntilUnbonded = 5
 	DefaultGenStateDogfood.Params.MinSelfDelegation = sdkmath.NewInt(100)
