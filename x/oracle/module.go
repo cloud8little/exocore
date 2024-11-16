@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-	"sync"
 
 	// this line is used by starport scaffolding # 1
 
@@ -28,9 +27,8 @@ import (
 )
 
 var (
-	_    module.AppModule      = AppModule{}
-	_    module.AppModuleBasic = AppModuleBasic{}
-	once                       = sync.Once{}
+	_ module.AppModule      = AppModule{}
+	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
 // ----------------------------------------------------------------------------

@@ -15,7 +15,6 @@ func (n *Network) QueryOracle() oracletypes.QueryClient {
 
 func (n *Network) QueryBank() banktypes.QueryClient {
 	return banktypes.NewQueryClient(n.Validators[0].ClientCtx)
-
 }
 
 func (n *Network) QueryAssets() assetstypes.QueryClient {

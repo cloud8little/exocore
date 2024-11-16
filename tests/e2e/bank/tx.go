@@ -9,7 +9,7 @@ import (
 
 func (s *E2ETestSuite) TestSendCoin() {
 	kr := s.network.Validators[0].ClientCtx.Keyring
-	// generate a new account with ethsecp256k1 to recieve/send native coins (hua)
+	// generate a new account with ethsecp256k1 to receive/send native coins (hua)
 	toAddr, err := e2e.GenerateAccAddress(kr, "user1")
 	s.Require().NoError(err)
 	// generate sendCoin msg

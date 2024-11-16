@@ -152,13 +152,9 @@ func (s *E2ETestSuite) TestCreatePriceLST() {
 	s.Require().Equal(priceTest1R4.getPriceTimeRound(4), res.Price)
 }
 
-func (s *E2ETestSuite) TestCreatePriceNST() {
+func (s *E2ETestSuite) TestCreatePriceNST() {}
 
-}
-
-func (s *E2ETestSuite) TestSlashing() {
-
-}
+func (s *E2ETestSuite) TestSlashing() {}
 
 func (s *E2ETestSuite) moveToAndCheck(height int64) {
 	_, err := s.network.WaitForHeightWithTimeout(height, 30*time.Second)
