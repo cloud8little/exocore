@@ -41,6 +41,7 @@ func (e ed25519Algo) Generate() hd.GenerateFn {
 		if len(bz) != cryptoed25519.PrivateKeySize {
 			panic("invalid ed25519 private key size")
 		}
+		//nolint:staticcheck
 		return &ed25519.PrivKey{
 			Key: cryptoed25519.PrivateKey(bz),
 		}

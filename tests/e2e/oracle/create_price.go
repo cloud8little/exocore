@@ -161,6 +161,7 @@ func (s *E2ETestSuite) moveToAndCheck(height int64) {
 	s.Require().NoError(err)
 }
 
+//nolint:unused
 func (s *E2ETestSuite) moveNAndCheck(n int64) {
 	for i := int64(0); i < n; i++ {
 		err := s.network.WaitForNextBlock()

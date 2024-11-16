@@ -22,6 +22,7 @@ func (p priceTime) getPriceTimeDetID(detID string) oracletypes.PriceTimeDetID {
 		DetID:     detID,
 	}
 }
+
 func (p priceTime) getPriceTimeRound(roundID uint64) oracletypes.PriceTimeRound {
 	return oracletypes.PriceTimeRound{
 		Price:     p.Price,
