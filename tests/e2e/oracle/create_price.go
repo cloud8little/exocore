@@ -2,16 +2,30 @@ package oracle
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	"github.com/ExocoreNetwork/exocore/testutil/network"
 	oracletypes "github.com/ExocoreNetwork/exocore/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
+// TestCreatePrice run test cases for oracle module including related workflow from other module(assets)
+// create-price for LST
+// create-price for NST
+// registerToken automatically through assets module when precompiled is called
+func (s *E2ETestSuite) TestCreatePrice() {
+	// we combine all test cases into one big case to avoid reset the network multiple times
+	s.testRegisterTokenThroughPrecompile()
+	s.testCreatePriceLST()
+}
+
 /*
-	cases:
+cases:
+
 	  we need more than 2/3 power, so that at least 3 out of 4 validators power should be enough
 		1. block_1_1: v1 sendPrice{p1}, [no round_1 price after block_1_1 committed], block_1_2:v2&v3 sendPrice{p1}, [got round_1 price{p1} after block_1_2 committed]
 		2. block_2_1: v3 sendPrice{p2}, block_2_2: v1 sendPrice{p2}, [no round_2 price after block_2_2 committed], block_2_3:nothing, [got round_2 price{p1} equals to round_1 after block_2_3 committed]
@@ -20,8 +34,7 @@ import (
 
 		--- nonce:
 */
-
-func (s *E2ETestSuite) TestCreatePriceLST() {
+func (s *E2ETestSuite) testCreatePriceLST() {
 	kr0 := s.network.Validators[0].ClientCtx.Keyring
 	creator0 := sdk.AccAddress(s.network.Validators[0].PubKey.Address())
 
@@ -30,9 +43,6 @@ func (s *E2ETestSuite) TestCreatePriceLST() {
 
 	kr2 := s.network.Validators[2].ClientCtx.Keyring
 	creator2 := sdk.AccAddress(s.network.Validators[2].PubKey.Address())
-
-	//	kr3 := s.network.Validators[2].ClientCtx.Keyring
-	//	creator3 := sdk.AccAddress(s.network.Validators[2].PubKey.Address())
 
 	priceTest1R1 := price1.updateTimestamp()
 	priceTimeDetID1R1 := priceTest1R1.getPriceTimeDetID("9")
@@ -45,6 +55,7 @@ func (s *E2ETestSuite) TestCreatePriceLST() {
 
 	// case_1.
 	s.moveToAndCheck(10)
+
 	// send create-price from validator-0
 	msg0 := oracletypes.NewMsgCreatePrice(creator0.String(), 1, []*oracletypes.PriceSource{&priceSource1R1}, 10, 1)
 	err := s.network.SendTxOracleCreateprice([]sdk.Msg{msg0}, "valconskey0", kr0)
@@ -152,9 +163,32 @@ func (s *E2ETestSuite) TestCreatePriceLST() {
 	s.Require().Equal(priceTest1R4.getPriceTimeRound(4), res.Price)
 }
 
-func (s *E2ETestSuite) TestCreatePriceNST() {}
+//nolint:unused
+func (s *E2ETestSuite) testCreatePriceNST() {}
 
-func (s *E2ETestSuite) TestSlashing() {}
+//nolint:unused
+func (s *E2ETestSuite) testSlashing() {}
+
+func (s *E2ETestSuite) testRegisterTokenThroughPrecompile() {
+	s.moveToAndCheck(5)
+	clientChainID := uint32(101)
+	assetAddr := common.HexToAddress("0xB82381A3fBD3FaFA77B3a7bE693342618240065b")
+	token := network.PaddingAddressTo32(assetAddr)
+	decimal := uint8(18)
+	name := "WSTETH"
+	metaData := "WSTETH for sepolia 2"
+	oracleInfo := fmt.Sprintf("%s,Ethereum,8,10,0xB82381A3fBD3FaFA77B3a7bE693342618240067b", name)
+
+	// send eth transaction to precompile contract to register a new token
+	err := s.network.SendPrecompileTx(network.ASSETS, "registerToken", clientChainID, token, decimal, name, metaData, oracleInfo)
+	s.Require().NoError(err)
+
+	s.moveToAndCheck(8)
+	// registerToken will automaticlly register that token into oracle module
+	res, err := s.network.QueryOracle().Params(context.Background(), &oracletypes.QueryParamsRequest{})
+	s.Require().NoError(err)
+	s.Require().Equal(name, res.Params.Tokens[2].Name)
+}
 
 func (s *E2ETestSuite) moveToAndCheck(height int64) {
 	_, err := s.network.WaitForHeightWithTimeout(height, 30*time.Second)
