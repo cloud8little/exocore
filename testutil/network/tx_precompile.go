@@ -19,11 +19,10 @@ type precompile string
 
 const (
 	privateKey = "D196DCA836F8AC2FFF45B3C9F0113825CCBB33FA1B39737B948503B263ED75AE" // gitleaks:allow
+	gasLimit   = uint64(500000)
 
 	ASSETS     precompile = "assets"
-	OPERATOR   precompile = "operator"
 	DELEGATION precompile = "delegation"
-	gasLimit              = uint64(500000)
 )
 
 var (
@@ -31,7 +30,6 @@ var (
 	callAddr        = crypto.PubkeyToAddress(sk.PublicKey)
 	precompilePaths = map[precompile]string{
 		ASSETS:     "../../precompiles/assets/abi.json",
-		OPERATOR:   "../../precompiles/operator/abi.json",
 		DELEGATION: "../../precompiles/delegation/abi.json",
 	}
 	abis                = make(map[precompile]abi.ABI)
