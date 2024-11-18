@@ -18,6 +18,8 @@ import (
 type precompile string
 
 const (
+	//onlint:all
+	//gitleaks:allow
 	privateKey = "D196DCA836F8AC2FFF45B3C9F0113825CCBB33FA1B39737B948503B263ED75AE"
 
 	ASSETS     precompile = "assets"
