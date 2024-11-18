@@ -39,6 +39,8 @@ func (s *E2ETestSuite) TestSendCoin() {
 	// wait to next block for tx to be included
 	err = s.network.WaitForNextBlock()
 	s.Require().NoError(err)
+	err = s.network.WaitForNextBlock()
+	s.Require().NoError(err)
 
 	// check user2's balance
 	res, err = e2e.QueryNativeCoinBalance(toAddr2, s.network)
