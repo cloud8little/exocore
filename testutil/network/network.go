@@ -116,16 +116,14 @@ func DefaultConfig() Config {
 		TimeoutCommit:     2 * time.Second,
 		ChainID:           chainID,
 		NumValidators:     4,
-		// BondDenom:         "hua",
-		NativeDenom: "hua",
-		// MinGasPrices:    fmt.Sprintf("0.000006%s", "exo"),
-		MinGasPrices:    "10hua",
-		AccountTokens:   sdk.TokensFromConsensusPower(1000, evmostypes.PowerReduction),
-		DepositedTokens: sdk.TokensFromConsensusPower(500, evmostypes.PowerReduction),
-		StakingTokens:   sdk.TokensFromConsensusPower(200, evmostypes.PowerReduction),
-		PruningStrategy: pruningtypes.PruningOptionNothing,
-		CleanupDir:      true,
-		SigningAlgo:     string(hd.EthSecp256k1Type),
+		NativeDenom:       "hua",
+		MinGasPrices:      "10hua",
+		AccountTokens:     sdk.TokensFromConsensusPower(1000, evmostypes.PowerReduction),
+		DepositedTokens:   sdk.TokensFromConsensusPower(500, evmostypes.PowerReduction),
+		StakingTokens:     sdk.TokensFromConsensusPower(200, evmostypes.PowerReduction),
+		PruningStrategy:   pruningtypes.PruningOptionNothing,
+		CleanupDir:        true,
+		SigningAlgo:       string(hd.EthSecp256k1Type),
 		// KeyringOptions:  []keyring.Option{hd.EthSecp256k1Option()},
 		KeyringOptions: []keyring.Option{exocorecrypto.Ed25519Option()},
 		PrintMnemonic:  false,
@@ -258,7 +256,6 @@ func New(l Logger, baseDir string, cfg Config) (*Network, error) {
 		appCfg := config.DefaultConfig()
 		appCfg.MinGasPrices = cfg.MinGasPrices
 		appCfg.Pruning = cfg.PruningStrategy
-		appCfg.MinGasPrices = cfg.MinGasPrices
 		appCfg.API.Enable = true
 		appCfg.API.Swagger = false
 		appCfg.Telemetry.Enabled = false

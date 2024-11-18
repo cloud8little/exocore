@@ -132,13 +132,9 @@ func parseABI(abiPath string) (abi.ABI, error) {
 	return abi.JSON(f)
 }
 
-// PaddnigAddressTo32 pads the 20-length address to 32 bytes with 0s
+// PaddingAddressTo32 pads the 20-length address to 32 bytes with 0s
 func PaddingAddressTo32(address common.Address) []byte {
-	paddingLen := 32 - len(address)
-	ret := make([]byte, len(address))
+	ret := make([]byte, 32)
 	copy(ret, address[:])
-	for i := 0; i < paddingLen; i++ {
-		ret = append(ret, 0)
-	}
 	return ret
 }
