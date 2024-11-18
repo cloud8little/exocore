@@ -45,7 +45,7 @@ func init() {
 	_, currentFile, _, ok := runtime.Caller(0)
 	if !ok {
 		fmt.Println("Failed to get current file path")
-		return
+		panic("Failed to get current file path")
 	}
 	basePath := filepath.Dir(currentFile)
 	var err error
@@ -53,8 +53,7 @@ func init() {
 		p := filepath.Join(basePath, precompilePath)
 		abis[precompileName], err = parseABI(p)
 		if err != nil {
-			fmt.Printf("Failed to parse abi from path:%s\r\n", p)
-			return
+			panic(fmt.Sprintf("Failed to parse abi from path:%s\r\n", p))
 		}
 	}
 }
