@@ -18,9 +18,7 @@ import (
 type precompile string
 
 const (
-	//onlint:all
-	//gitleaks:allow
-	privateKey = "D196DCA836F8AC2FFF45B3C9F0113825CCBB33FA1B39737B948503B263ED75AE"
+	privateKey = "D196DCA836F8AC2FFF45B3C9F0113825CCBB33FA1B39737B948503B263ED75AE" // gitleaks:allow
 
 	ASSETS     precompile = "assets"
 	OPERATOR   precompile = "operator"
@@ -29,7 +27,7 @@ const (
 )
 
 var (
-	sk, _           = crypto.HexToECDSA(privateKey)
+	sk, _           = crypto.HexToECDSA(privateKey) // gitleaks:allow
 	callAddr        = crypto.PubkeyToAddress(sk.PublicKey)
 	precompilePaths = map[precompile]string{
 		ASSETS:     "../../precompiles/assets/abi.json",
