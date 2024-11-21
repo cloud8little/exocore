@@ -2,6 +2,7 @@ package aggregator
 
 import (
 	"math/big"
+	"sort"
 
 	"github.com/ExocoreNetwork/exocore/x/oracle/keeper/common"
 	"github.com/ExocoreNetwork/exocore/x/oracle/types"
@@ -124,6 +125,7 @@ func (agg *aggregator) fillPrice(pSources []*types.PriceSource, validator string
 							pTR.price = new(big.Int).Set(priceTmp.price)
 							pTR.detRoundID = priceTmp.detRoundID
 							pTR.timestamp = priceTmp.timestamp
+							break
 						}
 					}
 				}
@@ -151,7 +153,7 @@ func (agg *aggregator) confirmDSPrice(confirmedRounds []*confirmedPrice) {
 					price.detRoundID = priceSourceRound.detID
 					price.timestamp = priceSourceRound.timestamp
 					price.price = priceSourceRound.price
-				} // else TODO: panice in V1
+				} // else TODO: panic in V1
 			}
 		}
 	}
@@ -189,6 +191,37 @@ func (agg *aggregator) aggregate() *big.Int {
 		}
 	}
 	return agg.finalPrice
+}
+
+// TODO: this only suites for DS. check source type for extension
+// GetFinaPriceListForFeederIDs retrieve final price info as an array ordered by sourceID asc
+func (agg *aggregator) getFinalPriceList(feederID uint64) []*types.AggFinalPrice {
+	sourceIDs := make([]uint64, 0, len(agg.dsPrices))
+	for sID := range agg.dsPrices {
+		sourceIDs = append(sourceIDs, sID)
+	}
+	sort.Slice(sourceIDs, func(i, j int) bool {
+		return sourceIDs[i] < sourceIDs[j]
+	})
+	ret := make([]*types.AggFinalPrice, 0, len(sourceIDs))
+	for _, sID := range sourceIDs {
+		for _, report := range agg.reports {
+			price := report.prices[sID]
+			if price == nil || price.detRoundID != agg.dsPrices[sID] {
+				// the DetID mismatch should not happen
+				continue
+			}
+			ret = append(ret, &types.AggFinalPrice{
+				FeederID: feederID,
+				SourceID: sID,
+				DetID:    price.detRoundID,
+				Price:    price.price.String(),
+			})
+			// {feederID, sourceID} has been found, skip rest reports
+			break
+		}
+	}
+	return ret
 }
 
 func newAggregator(validatorSetLength int, totalPower *big.Int) *aggregator {

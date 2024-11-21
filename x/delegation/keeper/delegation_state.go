@@ -303,6 +303,7 @@ func (k *Keeper) SetStakerShareToZero(ctx sdk.Context, operator, assetID string,
 		singleStateKey := assetstype.GetJoinedStoreKey(stakerID, assetID, operator)
 		value := store.Get(singleStateKey)
 		if value != nil {
+			// TODO: check if pendingUndelegation==0 => just delete this item instead of update share to zero, otherwise this item will be left in the storage forever with zero value
 			delegationState := delegationtype.DelegationAmounts{}
 			k.cdc.MustUnmarshal(value, &delegationState)
 			delegationState.UndelegatableShare = sdkmath.LegacyZeroDec()

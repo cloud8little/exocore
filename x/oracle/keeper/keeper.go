@@ -25,6 +25,7 @@ type (
 		common.KeeperDogfood
 		delegationKeeper types.DelegationKeeper
 		assetsKeeper     types.AssetsKeeper
+		types.SlashingKeeper
 	}
 )
 
@@ -39,6 +40,7 @@ func NewKeeper(
 	delegationKeeper types.DelegationKeeper,
 	assetsKeeper types.AssetsKeeper,
 	authority string,
+	slashingKeeper types.SlashingKeeper,
 ) Keeper {
 	// ensure authority is a valid bech32 address
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
@@ -58,6 +60,7 @@ func NewKeeper(
 		delegationKeeper: delegationKeeper,
 		assetsKeeper:     assetsKeeper,
 		authority:        authority,
+		SlashingKeeper:   slashingKeeper,
 	}
 }
 

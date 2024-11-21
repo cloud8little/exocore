@@ -22,7 +22,7 @@ func GetSlashIDForDogfood(infraction stakingtypes.Infraction, infractionHeight i
 	return strings.Join([]string{hexutil.EncodeUint64(uint64(infraction)), hexutil.EncodeUint64(uint64(infractionHeight))}, utils.DelimiterForID)
 }
 
-// SlashFromUndelegation executes the slash from an undelegation
+// SlashFromUndelegation executes the slash from an undelegation, reduce the .ActualCompletedAmount from undelegationRecords
 func SlashFromUndelegation(undelegation *delegationtype.UndelegationRecord, slashProportion sdkmath.LegacyDec) *types.SlashFromUndelegation {
 	if undelegation.ActualCompletedAmount.IsZero() {
 		return nil
@@ -135,6 +135,7 @@ func (k *Keeper) SlashAssets(ctx sdk.Context, snapshotHeight int64, parameter *t
 			state.OperatorShare = sdkmath.LegacyZeroDec()
 		}
 		state.TotalAmount = remainingAmount
+		// TODO: check if pendingUndelegation also zero => delete this item, and this operator should be opted out if all aasets falls to 0 since the miniself is not satisfied then.
 		executionInfo.SlashAssetsPool = append(executionInfo.SlashAssetsPool, types.SlashFromAssetsPool{
 			AssetID: assetID,
 			Amount:  slashAmount,

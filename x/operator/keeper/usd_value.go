@@ -372,7 +372,6 @@ func (k *Keeper) CalculateUSDValueForOperator(
 	}
 	// iterate all assets owned by the operator to calculate its voting power
 	opFuncToIterateAssets := func(assetID string, state *assetstype.OperatorAssetInfo) error {
-		//		var price operatortypes.Price
 		var price oracletype.Price
 		var decimal uint32
 		if isForSlash {

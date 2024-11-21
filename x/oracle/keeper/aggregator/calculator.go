@@ -52,7 +52,6 @@ func (r *roundPrices) updatePriceAndPower(pw *priceAndPower, totalPower *big.Int
 		updated = true
 		if common.ExceedsThreshold(pw.power, totalPower) {
 			r.price = pw.price
-			//			r.confirmed = true
 			confirmed = true
 		}
 	}
