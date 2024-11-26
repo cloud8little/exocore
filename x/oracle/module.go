@@ -195,7 +195,7 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 	}
 
 	// TODO: for v1 use mode==1, just check the failed feeders
-	_, failed, sealed, windowClosed := agc.SealRound(ctx, forceSeal)
+	_, failed, _, windowClosed := agc.SealRound(ctx, forceSeal)
 	defer func() {
 		for _, feederID := range windowClosed {
 			agc.RemoveWorker(feederID)
@@ -348,9 +348,6 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 		}
 	}
 
-	for _, feederID := range sealed {
-		am.keeper.RemoveNonceWithFeederIDForValidators(ctx, feederID, agc.GetValidators())
-	}
 	// append new round with previous price for fail-sealed token
 	for _, tokenID := range failed {
 		prevPrice, nextRoundID := am.keeper.GrowRoundID(ctx, tokenID)

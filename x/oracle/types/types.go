@@ -46,9 +46,13 @@ type AggFinalPrice struct {
 const (
 	DefaultPriceValue   = 1
 	DefaultPriceDecimal = 0
+
+	NSTIDPrefix = "NST"
 )
 
-var DelimiterForCombinedKey = byte('/')
+var (
+	DelimiterForCombinedKey = byte('/')
+)
 
 func Uint64Bytes(value uint64) []byte {
 	valueBytes := make([]byte, 8)

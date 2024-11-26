@@ -7,6 +7,7 @@ import (
 	operatortypes "github.com/ExocoreNetwork/exocore/x/operator/types"
 	oracletypes "github.com/ExocoreNetwork/exocore/x/oracle/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 )
 
 func (n *Network) QueryOracle() oracletypes.QueryClient {
@@ -31,4 +32,8 @@ func (n *Network) QueryAVS() avstypes.QueryClient {
 
 func (n *Network) QueryDogfood() dogfoodtypes.QueryClient {
 	return dogfoodtypes.NewQueryClient(n.Validators[0].ClientCtx)
+}
+
+func (n *Network) QuerySlashing() slashingtypes.QueryClient {
+	return slashingtypes.NewQueryClient(n.Validators[0].ClientCtx)
 }

@@ -1,6 +1,8 @@
 package oracle
 
 import (
+	"time"
+
 	"github.com/ExocoreNetwork/exocore/testutil/network"
 	"github.com/stretchr/testify/suite"
 )
@@ -21,6 +23,10 @@ func (s *E2ETestSuite) SetupSuite() {
 	var err error
 	s.network, err = network.New(s.T(), s.T().TempDir(), s.cfg)
 	s.Require().NoError(err)
-	_, err = s.network.WaitForHeight(2)
+	_, err = s.network.WaitForHeightWithTimeout(2, 20*time.Second)
 	s.Require().NoError(err)
+}
+
+func (s *E2ETestSuite) TearDownSuite() {
+	s.network.Cleanup()
 }

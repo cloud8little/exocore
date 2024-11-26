@@ -1,6 +1,9 @@
 package network
 
 import (
+	"fmt"
+	"time"
+
 	sdkmath "cosmossdk.io/math"
 	assetstypes "github.com/ExocoreNetwork/exocore/x/assets/types"
 	delegationtypes "github.com/ExocoreNetwork/exocore/x/delegation/types"
@@ -13,7 +16,11 @@ const (
 	// TestEVMChainID represents the LayerZero chain ID for the test EVM chain
 	TestEVMChainID = 101
 	// EVMAddressLength is the standard length of EVM addresses in bytes
-	EVMAddressLength = 20
+	EVMAddressLength   = 20
+	NativeAssetAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+	ETHAssetAddress    = "0xdac17f958d2ee523a2206206994597c13d831ec7"
+	NativeAssetID      = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee_0x65"
+	ETHAssetID         = "0xdac17f958d2ee523a2206206994597c13d831ec7_0x65"
 )
 
 var (
@@ -34,8 +41,8 @@ var (
 			},
 		},
 		Tokens: []assetstypes.StakingAssetInfo{
-			NewTestToken("ETH", "Ethereum native token", "0xdac17f958d2ee523a2206206994597c13d831ec7", TestEVMChainID, 5000),
-			NewTestToken("NST ETH", "native restaking ETH", "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", TestEVMChainID, 5000),
+			NewTestToken("ETH", "Ethereum native token", ETHAssetAddress, TestEVMChainID, 5000),
+			NewTestToken("NST ETH", "native restaking ETH", NativeAssetAddress, TestEVMChainID, 5000),
 		},
 	}
 
@@ -52,9 +59,15 @@ var (
 
 func init() {
 	// bond assetsIDs of ETH, NSTETH to ETH price
-	DefaultGenStateOracle.Params.Tokens[1].AssetID = "0xdac17f958d2ee523a2206206994597c13d831ec7_0x65,0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee_0x65"
+	DefaultGenStateOracle.Params.Tokens[1].AssetID = fmt.Sprintf("%s,%s", ETHAssetID, NativeAssetID)
 	// set ETH tokenfeeder's 'StartBaseBlock' to 10
 	DefaultGenStateOracle.Params.TokenFeeders[1].StartBaseBlock = 10
+	// set NSTETH tokenfeeder's 'StartBaseBlock' to 7
+	DefaultGenStateOracle.Params.TokenFeeders[2].StartBaseBlock = 7
+	// set slashing_miss window to 4
+	DefaultGenStateOracle.Params.Slashing.ReportedRoundsWindow = 4
+	// set jailduration of oracle report downtime to 30 seconds for test
+	DefaultGenStateOracle.Params.Slashing.OracleMissJailDuration = 30 * time.Second
 }
 
 func NewTestToken(name, metaInfo, address string, chainID uint64, amount int64) assetstypes.StakingAssetInfo {

@@ -537,19 +537,20 @@ func (n *Network) LatestHeight() (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-
 	return status.SyncInfo.LatestBlockHeight, nil
 }
 
 // WaitForHeight performs a blocking check where it waits for a block to be
 // committed after a given block. If that height is not reached within a timeout,
 // an error is returned. Regardless, the latest height queried is returned.
+// check for block height, not guaranteed state height
 func (n *Network) WaitForHeight(h int64) (int64, error) {
 	return n.WaitForHeightWithTimeout(h, 10*time.Second)
 }
 
 // WaitForHeightWithTimeout is the same as WaitForHeight except the caller can
 // provide a custom timeout.
+// check for block height, not guaranteed for state height
 func (n *Network) WaitForHeightWithTimeout(h int64, t time.Duration) (int64, error) {
 	ticker := time.NewTicker(time.Second)
 	timeout := time.After(t)
@@ -578,6 +579,59 @@ func (n *Network) WaitForHeightWithTimeout(h int64, t time.Duration) (int64, err
 	}
 }
 
+// LatestHeight returns the latest height of the network or an error if the
+// query fails or no validators exist.
+func (n *Network) LatestStateHeight() (int64, error) {
+	if len(n.Validators) == 0 {
+		return 0, errors.New("no validators available")
+	}
+
+	abciRes, err := n.Validators[0].RPCClient.ABCIInfo(context.Background())
+	if err != nil {
+		return 0, err
+	}
+	return abciRes.Response.LastBlockHeight, nil
+}
+
+// WaitForStateHeight performs a blocking check where it waits for a block to be
+// committed after a given block. If that height is not reached within a timeout,
+// an error is returned. Regardless, the latest height queried is returned.
+// guaranteed for state height
+func (n *Network) WaitForStateHeight(h int64) (int64, error) {
+	return n.WaitForStateHeightWithTimeout(h, 10*time.Second)
+}
+
+// WaitForStateHeightWithTimeout is the same as WaitForHeight except the caller can
+// provide a custom timeout.
+// guaranteed for state height
+func (n *Network) WaitForStateHeightWithTimeout(h int64, t time.Duration) (int64, error) {
+	ticker := time.NewTicker(time.Second)
+	timeout := time.After(t)
+
+	if len(n.Validators) == 0 {
+		return 0, errors.New("no validators available")
+	}
+
+	var latestHeight int64
+	val := n.Validators[0]
+
+	for {
+		select {
+		case <-timeout:
+			ticker.Stop()
+			return latestHeight, errors.New("timeout exceeded waiting for block")
+		case <-ticker.C:
+			abciRes, err := val.RPCClient.ABCIInfo(context.Background())
+			if err == nil && abciRes != nil {
+				latestHeight = abciRes.Response.LastBlockHeight
+				if latestHeight >= h {
+					return latestHeight, nil
+				}
+			}
+		}
+	}
+}
+
 // WaitForNextBlock waits for the next block to be committed, returning an error
 // upon failure.
 func (n *Network) WaitForNextBlock() error {
@@ -587,6 +641,22 @@ func (n *Network) WaitForNextBlock() error {
 	}
 
 	_, err = n.WaitForHeight(lastBlock + 1)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+// WaitForNextBlock waits for the next block to be committed, returning an error
+// upon failure.
+func (n *Network) WaitForStateNextBlock() error {
+	lastBlock, err := n.LatestStateHeight()
+	if err != nil {
+		return err
+	}
+
+	_, err = n.WaitForStateHeight(lastBlock + 1)
 	if err != nil {
 		return err
 	}

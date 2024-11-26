@@ -20,27 +20,28 @@ import (
 // undelegate: update operator's price, operator's totalAmount, operator's totalShare, staker's share
 // msg(refund or slash on beaconChain): update staker's price, operator's price
 
-type NSTETHAssetID string
+type NSTAssetID string
 
 const (
+	NSTETHAssetAddr = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 	// TODO: we currently support NSTETH only which has capped effective balance for one validator
 	// TODO: this is a bad practice, and for Lz, they have different version of endpoint with different chainID
 	// Do the validation before invoke oracle related functions instead of check these hard code ids here.
-	NSTETHAssetIDMainnet  NSTETHAssetID = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee_0x7595"
-	NSTETHAssetIDLocalnet NSTETHAssetID = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee_0x65"
-	NSTETHAssetIDHolesky  NSTETHAssetID = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee_0x9d19"
-	NSTETHAssetIDSepolia  NSTETHAssetID = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee_0x9ce1"
+	NSTETHAssetIDMainnet  NSTAssetID = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee_0x7595"
+	NSTETHAssetIDLocalnet NSTAssetID = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee_0x65"
+	NSTETHAssetIDHolesky  NSTAssetID = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee_0x9d19"
+	NSTETHAssetIDSepolia  NSTAssetID = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee_0x9ce1"
 )
 
 var (
-	limitedChangeNST = map[NSTETHAssetID]bool{
+	limitedChangeNST = map[NSTAssetID]bool{
 		NSTETHAssetIDMainnet:  true,
 		NSTETHAssetIDLocalnet: true,
 		NSTETHAssetIDHolesky:  true,
 		NSTETHAssetIDSepolia:  true,
 	}
 
-	maxEffectiveBalances = map[NSTETHAssetID]int{
+	maxEffectiveBalances = map[NSTAssetID]int{
 		NSTETHAssetIDMainnet:  32,
 		NSTETHAssetIDLocalnet: 32,
 		NSTETHAssetIDHolesky:  32,
@@ -79,7 +80,9 @@ func (k Keeper) GetStakerInfos(ctx sdk.Context, assetID string) (ret []*types.St
 		sInfo := types.StakerInfo{}
 		k.cdc.MustUnmarshal(iterator.Value(), &sInfo)
 		// keep only the latest effective-balance
-		sInfo.BalanceList = sInfo.BalanceList[:len(sInfo.BalanceList)-1]
+		if len(sInfo.BalanceList) > 0 {
+			sInfo.BalanceList = sInfo.BalanceList[len(sInfo.BalanceList)-1:]
+		}
 		// this is mainly used by price feeder, so we remove the stakerAddr to reduce the size of return value
 		sInfo.StakerAddr = ""
 		ret = append(ret, &sInfo)
@@ -417,9 +420,9 @@ func getStakerID(stakerAddr string, chainID uint64) string {
 
 // IsLimitChangesNST returns that is input assetID corresponding to asset which balance change has a cap limit
 func IsLimitedChangeNST(assetID string) bool {
-	return limitedChangeNST[NSTETHAssetID(assetID)]
+	return limitedChangeNST[NSTAssetID(assetID)]
 }
 
 func maxEffectiveBalance(assetID string) int {
-	return maxEffectiveBalances[NSTETHAssetID(assetID)]
+	return maxEffectiveBalances[NSTAssetID(assetID)]
 }

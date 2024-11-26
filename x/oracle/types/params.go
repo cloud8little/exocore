@@ -64,6 +64,14 @@ func DefaultParams() Params {
 				Active:          true,
 				AssetID:         "0x0b34c4d876cd569129cf56bafabb3f9e97a4ff42_0x9ce1",
 			},
+			{
+				Name:            "NSTETH",
+				ChainID:         1,
+				ContractAddress: "0x",
+				Decimal:         0,
+				Active:          true,
+				AssetID:         "NST_0x65",
+			},
 		},
 		// source defines where to fetch the prices
 		Sources: []*Source{
@@ -96,6 +104,13 @@ func DefaultParams() Params {
 				RuleID:         1,
 				StartRoundID:   1,
 				StartBaseBlock: 1000000,
+				Interval:       10,
+			},
+			{
+				TokenID:        2,
+				RuleID:         1,
+				StartRoundID:   1,
+				StartBaseBlock: 10,
 				Interval:       10,
 			},
 		},

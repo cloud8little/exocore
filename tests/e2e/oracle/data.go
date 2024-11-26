@@ -49,6 +49,15 @@ func (p priceTime) generateRealTimeStructs(detID string, sourceID uint64) (price
 	}
 }
 
+func generateNSTPriceTime(sc [][]int) priceTime {
+	rawBytes := convertBalanceChangeToBytes(sc)
+	return priceTime{
+		Price:     string(rawBytes),
+		Decimal:   0,
+		Timestamp: time.Now().UTC().Format(layout),
+	}
+}
+
 var (
 	price1 = priceTime{
 		Price:     "199999",
@@ -60,4 +69,9 @@ var (
 		Decimal:   18,
 		Timestamp: time.Now().UTC().Format(layout),
 	}
+
+	stakerChanges1 = [][]int{
+		[]int{0, -4},
+	}
+	priceNST1 = generateNSTPriceTime(stakerChanges1)
 )
