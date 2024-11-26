@@ -7,7 +7,6 @@ import (
 	"github.com/imroc/biu"
 )
 
-//nolint:unused
 func convertBalanceChangeToBytes(stakerChanges [][]int) []byte {
 	if len(stakerChanges) == 0 {
 		// length equals to 0 means that alls takers have efb of 32 with 0 changes

@@ -38,6 +38,7 @@ func (p priceTime) updateTimestamp() priceTime {
 	return p
 }
 
+//nolint:all
 func (p priceTime) generateRealTimeStructs(detID string, sourceID uint64) (priceTime, oracletypes.PriceSource) {
 	retP := p.updateTimestamp()
 	pTimeDetID := retP.getPriceTimeDetID(detID)
@@ -70,8 +71,6 @@ var (
 		Timestamp: time.Now().UTC().Format(layout),
 	}
 
-	stakerChanges1 = [][]int{
-		[]int{0, -4},
-	}
-	priceNST1 = generateNSTPriceTime(stakerChanges1)
+	stakerChanges1 = [][]int{{0, -4}}
+	priceNST1      = generateNSTPriceTime(stakerChanges1)
 )

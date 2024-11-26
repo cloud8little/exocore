@@ -50,9 +50,7 @@ const (
 	NSTIDPrefix = "NST"
 )
 
-var (
-	DelimiterForCombinedKey = byte('/')
-)
+var DelimiterForCombinedKey = byte('/')
 
 func Uint64Bytes(value uint64) []byte {
 	valueBytes := make([]byte, 8)
