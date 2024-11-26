@@ -62,8 +62,22 @@ func init() {
 	DefaultGenStateOracle.Params.Tokens[1].AssetID = fmt.Sprintf("%s,%s", ETHAssetID, NativeAssetID)
 	// set ETH tokenfeeder's 'StartBaseBlock' to 10
 	DefaultGenStateOracle.Params.TokenFeeders[1].StartBaseBlock = 10
-	// set NSTETH tokenfeeder's 'StartBaseBlock' to 7
-	DefaultGenStateOracle.Params.TokenFeeders[2].StartBaseBlock = 7
+	// set NSTETH token and tokenFeeder
+	DefaultGenStateOracle.Params.Tokens = append(DefaultGenStateOracle.Params.Tokens, &oracletypes.Token{
+		Name:            "NSTETH",
+		ChainID:         1,
+		ContractAddress: "0x",
+		Decimal:         0,
+		Active:          true,
+		AssetID:         "NST_0x65",
+	})
+	DefaultGenStateOracle.Params.TokenFeeders = append(DefaultGenStateOracle.Params.TokenFeeders, &oracletypes.TokenFeeder{
+		TokenID:        2,
+		RuleID:         1,
+		StartRoundID:   1,
+		StartBaseBlock: 7,
+		Interval:       10,
+	})
 	// set slashing_miss window to 4
 	DefaultGenStateOracle.Params.Slashing.ReportedRoundsWindow = 4
 	// set jailduration of oracle report downtime to 30 seconds for test
