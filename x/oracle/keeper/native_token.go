@@ -178,7 +178,7 @@ func (k Keeper) UpdateNSTValidatorListForStaker(ctx sdk.Context, assetID, staker
 	} else {
 		k.cdc.MustUnmarshal(value, stakerInfo)
 		if amountInt64 > 0 {
-			// deopsit add a new validator into staker's validatorList
+			// deposit add a new validator into staker's validatorList
 			// one validator can only deposit once before it completed withdraw which remove its pubkey form this list. So there's no need to check duplication
 			stakerInfo.ValidatorPubkeyList = append(stakerInfo.ValidatorPubkeyList, validatorPubkey)
 		}
@@ -199,7 +199,7 @@ func (k Keeper) UpdateNSTValidatorListForStaker(ctx sdk.Context, assetID, staker
 		newBalance.Change = types.Action_ACTION_WITHDRAW
 		for i, vPubkey := range stakerInfo.ValidatorPubkeyList {
 			if vPubkey == validatorPubkey {
-				// TODO: len(stkaerInfo.ValidatorPubkeyList)==0 shoule equal to newBalance.Balance<=0
+				// TODO: len(stkaerInfo.ValidatorPubkeyList)==0 should equal to newBalance.Balance<=0
 				stakerInfo.ValidatorPubkeyList = append(stakerInfo.ValidatorPubkeyList[:i], stakerInfo.ValidatorPubkeyList[i+1:]...)
 				break
 			}
@@ -269,7 +269,7 @@ func (k Keeper) UpdateNSTByBalanceChange(ctx sdk.Context, assetID string, rawDat
 	}
 	_, chainID, _ := assetstypes.ParseID(assetID)
 	if len(rawData) < 32 {
-		return errors.New("length of indicate maps for stakers shoule be exactly 32 bytes")
+		return errors.New("length of indicate maps for stakers should be exactly 32 bytes")
 	}
 	sl := k.GetStakerList(ctx, assetID)
 	if len(sl.StakerAddrs) == 0 {
@@ -309,7 +309,7 @@ func (k Keeper) UpdateNSTByBalanceChange(ctx sdk.Context, assetID string, rawDat
 		// staker's validatorlist: {v1, v2, v3, v5}
 		// in one same block: withdraw v2, v3, v5, balance of v2, v3, v5 all be slashed by -16
 		// => amount: 32*4->32(by withdraw), the validatorList of feeder will be updated on next block, so it will report the balance change of v5: -16 as in the staker's balance change, result to: 32*4->32-> 32-16*3 = -16
-		// we will just ingore this misbehavior introduced by synchronize-issue, and this will be correct in next block/round
+		// we will just ignore this misbehavior introduced by synchronize-issue, and this will be correct in next block/round
 		if balance > maxBalance || balance <= 0 {
 			// balance should not be able to be reduced to 0 by balance change
 			return errors.New("effective balance should never exceeds 32 for one validator and should be positive")
@@ -348,7 +348,7 @@ func (k Keeper) getDecimal(ctx sdk.Context, assetID string) (int, sdkmath.Int, e
 func parseBalanceChangeCapped(rawData []byte, sl types.StakerList) (map[string]int, error) {
 	// eg. 0100-000011
 	// first part 0100 tells that the effective-balance of staker corresponding to index 2 in StakerList
-	// the lenft part 000011. we use the first 4 bits to tell the length of this number, and it shows as 1 here, the 5th bit is used to tell symbol of the number, 1 means negative, then we can get the abs number indicate by the length. It's -1 here, means effective-balane is 32-1 on beacon chain for now
+	// the left part 000011. we use the first 4 bits to tell the length of this number, and it shows as 1 here, the 5th bit is used to tell symbol of the number, 1 means negative, then we can get the abs number indicate by the length. It's -1 here, means effective-balane is 32-1 on beacon chain for now
 	// the first 32 bytes are information to indicates effective-balance of which staker has changed, 1 means changed, 0 means not. 32 bytes can represents changes for at most 256 stakers
 	indexes := rawData[:32]
 	// bytes after first 32 are details of effective-balance change for each staker which has been marked with 1 in the first 32 bytes, for those who are marked with 0 will just be ignored

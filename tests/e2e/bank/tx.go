@@ -29,7 +29,8 @@ func (s *E2ETestSuite) TestSendCoin() {
 	s.Require().NoError(err)
 	s.Require().Equal(e2e.NewNativeCoin(sdkmath.NewInt(2000000), s.network), *res.Balance)
 
-	toAddr2, _ := e2e.GenerateAccAddress(kr, "user2")
+	toAddr2, err := e2e.GenerateAccAddress(kr, "user2")
+	s.Require().NoError(err)
 
 	msg = banktypes.NewMsgSend(toAddr, toAddr2, sdk.NewCoins(sdk.NewCoin(s.network.Config.NativeDenom, sdkmath.NewInt(100))))
 	// send sendCoinMsg

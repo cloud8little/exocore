@@ -34,7 +34,8 @@ var (
 	}
 	abis                = make(map[precompile]abi.ABI)
 	precompileAddresses = map[precompile]common.Address{
-		ASSETS: common.HexToAddress("0x0000000000000000000000000000000000000804"),
+		ASSETS:     common.HexToAddress("0x0000000000000000000000000000000000000804"),
+		DELEGATION: common.HexToAddress("0x0000000000000000000000000000000000000805"),
 	}
 )
 
@@ -78,12 +79,12 @@ func (n Network) SendPrecompileTx(preCompileName precompile, methodName string, 
 
 	nonce, err := ethC.NonceAt(ctx, callAddr, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get nonce for address %s: %w", callAddr.Hex(), err)
 	}
 
 	gasPrice, err := ethC.SuggestGasPrice(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get suggested gas price: %w", err)
 	}
 
 	retTx := types.NewTx(&types.LegacyTx{
@@ -97,7 +98,7 @@ func (n Network) SendPrecompileTx(preCompileName precompile, methodName string, 
 	signer := types.LatestSignerForChainID(chainID)
 	signTx, err := types.SignTx(retTx, signer, sk)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to sign transaction: %w", err)
 	}
 
 	fmt.Println("the txID is:", signTx.Hash().String())

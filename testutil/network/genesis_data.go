@@ -85,6 +85,12 @@ func init() {
 }
 
 func NewTestToken(name, metaInfo, address string, chainID uint64, amount int64) assetstypes.StakingAssetInfo {
+	if name == "" {
+		panic("token name cannot be empty")
+	}
+	if amount <= 0 {
+		panic("staking amount must be positive")
+	}
 	return assetstypes.StakingAssetInfo{
 		AssetBasicInfo: assetstypes.AssetInfo{
 			Name:             name,
