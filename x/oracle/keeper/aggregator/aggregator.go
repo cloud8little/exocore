@@ -56,7 +56,7 @@ type aggregator struct {
 
 func (agg *aggregator) copy4CheckTx() *aggregator {
 	ret := &aggregator{
-		finalPrice:  copyBigInt(agg.finalPrice),
+		finalPrice:  agg.finalPrice,
 		reportPower: copyBigInt(agg.reportPower),
 		totalPower:  copyBigInt(agg.totalPower),
 
@@ -68,13 +68,13 @@ func (agg *aggregator) copy4CheckTx() *aggregator {
 	}
 	for _, report := range agg.reports {
 		rTmp := *report
-		rTmp.price = copyBigInt(report.price)
+		rTmp.price = report.price
 		rTmp.power = copyBigInt(report.power)
 
 		for k, v := range report.prices {
 			// prices are information submitted by validators, these data will not change under deterministic sources, but with non-deterministic sources they might be overwrite by later prices
 			tmpV := *v
-			tmpV.price = copyBigInt(v.price)
+			tmpV.price = v.price
 			rTmp.prices[k] = &tmpV
 		}
 
