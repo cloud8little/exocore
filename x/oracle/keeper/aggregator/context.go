@@ -121,7 +121,7 @@ func (agc *AggregatorContext) sanityCheck(msg *types.MsgCreatePrice) error {
 	return nil
 }
 
-func (agc *AggregatorContext) checkMsg(msg *types.MsgCreatePrice) error {
+func (agc *AggregatorContext) checkMsg(msg *types.MsgCreatePrice, isCheckMode bool) error {
 	if err := agc.sanityCheck(msg); err != nil {
 		return err
 	}
@@ -139,7 +139,11 @@ func (agc *AggregatorContext) checkMsg(msg *types.MsgCreatePrice) error {
 				feederWorker.recordMessage(msg.Creator, msg.FeederID, list4Aggregator)
 			}
 		}
-		return fmt.Errorf("context is available for feederID:%d", msg.FeederID)
+		// if the validator send a tx inside an alive window but the status had been changed to closed by enough power collected
+		// we should ignore the error for simulation to complete
+		if !isCheckMode {
+			return fmt.Errorf("context is not available for feederID:%d", msg.FeederID)
+		}
 	}
 
 	// senity check on basedBlock
@@ -179,13 +183,12 @@ func (agc *AggregatorContext) FillPrice(msg *types.MsgCreatePrice) (*PriceItemKV
 	}
 
 	if listFilled := feederWorker.do(msg); listFilled != nil {
-		// record this message for performance evaluation(used for slashing)
 		feederWorker.recordMessage(msg.Creator, msg.FeederID, listFilled)
-		if finalPrice := feederWorker.aggregate(); finalPrice != nil {
+		if finalPrice := feederWorker.aggregate(); len(finalPrice) > 0 {
 			agc.rounds[msg.FeederID].status = roundStatusClosed
 			feederWorker.seal()
 			return &PriceItemKV{agc.params.GetTokenFeeder(msg.FeederID).TokenID, types.PriceTimeRound{
-				Price:   finalPrice.String(),
+				Price:   finalPrice,
 				Decimal: agc.params.GetTokenInfo(msg.FeederID).Decimal,
 				// TODO: check the format
 				Timestamp: msg.Prices[0].Prices[0].Timestamp,
@@ -201,8 +204,8 @@ func (agc *AggregatorContext) FillPrice(msg *types.MsgCreatePrice) (*PriceItemKV
 
 // NewCreatePrice receives msgCreatePrice message, and goes process: filter->aggregator, filter->calculator->aggregator
 // non-deterministic data will goes directly into aggregator, and deterministic data will goes into calculator first to get consensus on the deterministic id.
-func (agc *AggregatorContext) NewCreatePrice(_ sdk.Context, msg *types.MsgCreatePrice) (*PriceItemKV, *cache.ItemM, error) {
-	if err := agc.checkMsg(msg); err != nil {
+func (agc *AggregatorContext) NewCreatePrice(ctx sdk.Context, msg *types.MsgCreatePrice) (*PriceItemKV, *cache.ItemM, error) {
+	if err := agc.checkMsg(msg, ctx.IsCheckTx()); err != nil {
 		return nil, nil, types.ErrInvalidMsg.Wrap(err.Error())
 	}
 	return agc.FillPrice(msg)

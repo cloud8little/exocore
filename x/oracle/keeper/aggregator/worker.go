@@ -1,8 +1,6 @@
 package aggregator
 
 import (
-	"math/big"
-
 	"github.com/ExocoreNetwork/exocore/x/oracle/keeper/common"
 	"github.com/ExocoreNetwork/exocore/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -97,7 +95,7 @@ func (w *worker) do(msg *types.MsgCreatePrice) []*types.PriceSource {
 	return list4Aggregator
 }
 
-func (w *worker) aggregate() *big.Int {
+func (w *worker) aggregate() string {
 	return w.a.aggregate()
 }
 
@@ -107,8 +105,7 @@ func (w *worker) seal() {
 		return
 	}
 	w.sealed = true
-	w.price = w.a.aggregate().String()
-	w.c = nil
+	w.price = w.a.aggregate()
 }
 
 // newWorker new a instance for a tokenFeeder's specific round
