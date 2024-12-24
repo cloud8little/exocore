@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/ExocoreNetwork/exocore/utils"
 	"math"
 	"strings"
 
@@ -211,7 +212,7 @@ func (k *Keeper) QueryOperatorSlashInfo(goCtx context.Context, req *types.QueryO
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	res := make([]*types.OperatorSlashInfoByID, 0)
 
-	slashPrefix := types.AppendMany(types.KeyPrefixOperatorSlashInfo, assetstype.GetJoinedStoreKeyForPrefix(req.OperatorAddr, strings.ToLower(req.AvsAddress)))
+	slashPrefix := utils.AppendMany(types.KeyPrefixOperatorSlashInfo, assetstype.GetJoinedStoreKeyForPrefix(req.OperatorAddr, strings.ToLower(req.AvsAddress)))
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), slashPrefix)
 	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
 		ret := &types.OperatorSlashInfo{}
@@ -373,7 +374,7 @@ func (k *Keeper) QueryAllSnapshot(goCtx context.Context, req *types.QueryAllSnap
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	res := make([]*types.VotingPowerSnapshotKeyHeight, 0)
 
-	snapshotPrefix := types.AppendMany(types.KeyPrefixVotingPowerSnapshot, common.HexToAddress(req.Avs).Bytes())
+	snapshotPrefix := utils.AppendMany(types.KeyPrefixVotingPowerSnapshot, common.HexToAddress(req.Avs).Bytes())
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), snapshotPrefix)
 	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
 		ret := &types.VotingPowerSnapshot{}

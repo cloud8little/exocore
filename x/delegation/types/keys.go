@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/ExocoreNetwork/exocore/utils"
 	"strings"
 
 	assetstypes "github.com/ExocoreNetwork/exocore/x/assets/types"
@@ -82,8 +83,15 @@ func ParseStakerAssetIDAndOperator(key []byte) (keys *SingleDelegationInfoReq, e
 
 // GetUndelegationRecordKey returns the key for the undelegation record. The caller must ensure that the parameters
 // are valid; this function performs no validation whatsoever.
-func GetUndelegationRecordKey(blockHeight, lzNonce uint64, txHash string, operatorAddr string) []byte {
-	return []byte(strings.Join([]string{operatorAddr, hexutil.EncodeUint64(blockHeight), hexutil.EncodeUint64(lzNonce), txHash}, "/"))
+func GetUndelegationRecordKey(blockHeight, nonce uint64, txHash string, operatorAddr string) []byte {
+	return utils.AppendMany(
+		avs.Bytes(),
+		// Append the height
+		sdk.Uint64ToBigEndian(blockHeight),
+		// Append the nonce
+		sdk.Uint64ToBigEndian(nonce),
+	)
+	return []byte(strings.Join([]string{operatorAddr, hexutil.EncodeUint64(blockHeight), hexutil.EncodeUint64(nonce), txHash}, "/"))
 }
 
 type UndelegationKeyFields struct {

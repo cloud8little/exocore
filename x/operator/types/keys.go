@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/binary"
+	"github.com/ExocoreNetwork/exocore/utils"
 	"math"
 
 	"golang.org/x/xerrors"
@@ -129,7 +130,7 @@ func init() {
 
 func AddrAndChainIDKey(prefix byte, addr sdk.AccAddress, chainID string) []byte {
 	partialKey := ChainIDWithLenKey(chainID)
-	return AppendMany(
+	return utils.AppendMany(
 		// Append the prefix
 		[]byte{prefix},
 		// Append the addr bytes first so we can iterate over all chain ids
@@ -142,7 +143,7 @@ func AddrAndChainIDKey(prefix byte, addr sdk.AccAddress, chainID string) []byte 
 
 func ChainIDAndAddrKey(prefix byte, chainID string, addr sdk.AccAddress) []byte {
 	partialKey := ChainIDWithLenKey(chainID)
-	return AppendMany(
+	return utils.AppendMany(
 		// Append the prefix
 		[]byte{prefix},
 		// Append the partialKey so that we can look for any operator keys
@@ -160,7 +161,7 @@ func KeyForOperatorAndChainIDToConsKey(addr sdk.AccAddress, chainID string) []by
 }
 
 func KeyForVotingPowerSnapshot(avs common.Address, height int64) []byte {
-	return AppendMany(
+	return utils.AppendMany(
 		avs.Bytes(),
 		// Append the height
 		sdk.Uint64ToBigEndian(uint64(height)),
@@ -240,7 +241,7 @@ func KeyForChainIDAndOperatorToConsKey(chainID string, addr sdk.AccAddress) []by
 }
 
 func KeyForChainIDAndConsKeyToOperator(chainID string, addr sdk.ConsAddress) []byte {
-	return AppendMany(
+	return utils.AppendMany(
 		[]byte{BytePrefixForChainIDAndConsKeyToOperator},
 		ChainIDWithLenKey(chainID),
 		addr,
@@ -248,7 +249,7 @@ func KeyForChainIDAndConsKeyToOperator(chainID string, addr sdk.ConsAddress) []b
 }
 
 func KeyForOperatorKeyRemovalForChainID(addr sdk.AccAddress, chainID string) []byte {
-	return AppendMany(
+	return utils.AppendMany(
 		[]byte{BytePrefixForOperatorKeyRemovalForChainID}, addr,
 		ChainIDWithLenKey(chainID),
 	)
