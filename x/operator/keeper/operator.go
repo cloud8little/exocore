@@ -2,6 +2,9 @@ package keeper
 
 import (
 	"fmt"
+	"github.com/ExocoreNetwork/exocore/x/epochs/types"
+	"golang.org/x/xerrors"
+	"math"
 	"strings"
 
 	errorsmod "cosmossdk.io/errors"
@@ -259,6 +262,44 @@ func (k *Keeper) GetImpactfulAVSForOperator(ctx sdk.Context, operatorAddr string
 		return nil, err
 	}
 	return avsList, nil
+}
+
+func (k Keeper) GetUnbondingExpiration(ctx sdk.Context, operator sdk.AccAddress) (string, int64, error) {
+	// get the impactful AVSs for the operator
+	avsList, err := k.GetImpactfulAVSForOperator(ctx, operator.String())
+	if err != nil {
+		return "", 0, err
+	}
+	// calculate the maximum unbonding expiration
+	// Using minutes and the next epoch number as the default unbonding expiration.
+	// This requires the Exocore chain to have minute-level epoch functionality enabled.
+	minuteEpochInfo, exist := k.epochsKeeper.GetEpochInfo(ctx, types.MinuteEpochID)
+	if !exist {
+		return "", 0, errorsmod.Wrapf(operatortypes.ErrEpochIdentifierNotExist, "identifier:%s", types.MinuteEpochID)
+	}
+	retEpochIdentifier := types.MinuteEpochID
+	retEpochNumber := minuteEpochInfo.CurrentEpoch + 1
+	maxDurationSeconds := uint64(minuteEpochInfo.Duration)
+	for _, avs := range avsList {
+		epochInfo, err := k.avsKeeper.GetAVSEpochInfo(ctx, avs)
+		if err != nil {
+			return "", 0, err
+		}
+		unbondingDuration, err := k.avsKeeper.GetAVSUnbondingDuration(ctx, avs)
+		if err != nil {
+			return "", 0, err
+		}
+		if unbondingDuration+uint64(epochInfo.CurrentEpoch) > uint64(math.MaxInt64) {
+			return "", 0, xerrors.New("the sum of unbondingDuration and the current epoch number exceeds the int64 range.")
+		}
+		durationSeconds := unbondingDuration * uint64(epochInfo.Duration)
+		if durationSeconds > maxDurationSeconds {
+			retEpochIdentifier = epochInfo.Identifier
+			retEpochNumber = epochInfo.CurrentEpoch + int64(unbondingDuration)
+			maxDurationSeconds = durationSeconds
+		}
+	}
+	return retEpochIdentifier, retEpochNumber, nil
 }
 
 func (k *Keeper) SetAllOptedInfo(ctx sdk.Context, optedStates []operatortypes.OptedState) error {

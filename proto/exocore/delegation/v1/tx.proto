@@ -78,7 +78,9 @@ message UndelegationRecord {
   // should be completed.
   int64 completed_epoch_number = 7;
   // tx_nonce is the nonce of the transaction on the client chain or Exocore chain.
-  //
+  // The lzNonce will be used if the undelegation is initiated from the client chain.
+  // The Cosmos transaction sequence will be used when undelegating assets located on
+  // the Exocore chain.
   uint64 tx_nonce = 8;
   // amount is the amount of the asset to be undelegated.
   string amount = 9[

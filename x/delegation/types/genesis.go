@@ -215,18 +215,6 @@ func (gs GenesisState) ValidateUndelegations() error {
 				undelegation.TxHash, len(bytes), common.HashLength,
 			)
 		}
-		if !undelegation.IsPending {
-			return errorsmod.Wrapf(
-				ErrInvalidGenesisData, "all undelegations should be pending, undelegation:%v",
-				undelegation,
-			)
-		}
-		if undelegation.CompleteBlockNumber < undelegation.BlockNumber {
-			return errorsmod.Wrapf(
-				ErrInvalidGenesisData, "the block number to complete shouldn't be less than the submitted , undelegation：%v",
-				undelegation,
-			)
-		}
 		if undelegation.ActualCompletedAmount.GT(undelegation.Amount) {
 			return errorsmod.Wrapf(
 				ErrInvalidGenesisData, "the completed amount shouldn't be greater than the submitted amount , undelegation：%v",

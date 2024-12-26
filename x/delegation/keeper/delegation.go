@@ -137,20 +137,24 @@ func (k *Keeper) UndelegateFrom(ctx sdk.Context, params *delegationtype.Delegati
 		AssetId:               assetID,
 		OperatorAddr:          params.OperatorAddress.String(),
 		TxHash:                params.TxHash.String(),
-		IsPending:             true,
-		LzTxNonce:             params.LzNonce,
+		TxNonce:               params.TxNonce,
 		BlockNumber:           uint64(ctx.BlockHeight()),
 		Amount:                removeToken,
 		ActualCompletedAmount: removeToken,
 	}
-	r.CompleteBlockNumber = k.operatorKeeper.GetUnbondingExpirationBlockNumber(ctx, params.OperatorAddress, r.BlockNumber)
+	completedEpochId, completedEpochNumber, err := k.operatorKeeper.GetUnbondingExpiration(ctx, params.OperatorAddress)
+	if err != nil {
+		return err
+	}
+	r.CompletedEpochIdentifier = completedEpochId
+	r.CompletedEpochNumber = completedEpochNumber
 	err = k.SetUndelegationRecords(ctx, []delegationtype.UndelegationRecord{r})
 	if err != nil {
 		return err
 	}
 
 	// call the hooks registered by the other modules
-	return k.Hooks().AfterUndelegationStarted(ctx, params.OperatorAddress, delegationtype.GetUndelegationRecordKey(r.BlockNumber, r.LzTxNonce, r.TxHash, r.OperatorAddr))
+	return k.Hooks().AfterUndelegationStarted(ctx, params.OperatorAddress, delegationtype.GetUndelegationRecordKey(r.BlockNumber, r.TxNonce, r.TxHash, r.OperatorAddr))
 }
 
 // AssociateOperatorWithStaker marks that a staker is claiming to be associated with an operator.

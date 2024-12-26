@@ -33,7 +33,7 @@ func (k *Keeper) EndBlock(
 		operatorAccAddress := sdk.MustAccAddressFromBech32(record.OperatorAddr)
 		// TODO check if the operator has been slashed or frozen
 		recordID := types.GetUndelegationRecordKey(
-			record.BlockNumber, record.LzTxNonce, record.TxHash, record.OperatorAddr,
+			record.BlockNumber, record.TxNonce, record.TxHash, record.OperatorAddr,
 		)
 		if k.GetUndelegationHoldCount(cc, recordID) > 0 {
 			// delete from all 3 states

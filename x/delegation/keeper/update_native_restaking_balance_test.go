@@ -24,7 +24,7 @@ func (suite *DelegationTestSuite) TestUpdateNSTBalance() {
 	suite.prepareDeposit(depositAmount)
 
 	delegationEvent := suite.prepareDelegation(delegateAmountToDefaultOperator, suite.opAccAddr)
-	delegationEvent.LzNonce = 1
+	delegationEvent.TxNonce = 1
 	delegationEvent.OpAmount = undelegateAmountFromDefaultOperator
 	err = suite.App.DelegationKeeper.UndelegateFrom(suite.Ctx, delegationEvent)
 	suite.NoError(err)

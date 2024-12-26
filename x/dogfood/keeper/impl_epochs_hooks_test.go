@@ -55,7 +55,7 @@ func (suite *KeeperTestSuite) TestSameEpochOperations() {
 		// delegate
 		delegationParams := &delegationtypes.DelegationOrUndelegationParams{
 			ClientChainID:   lzID,
-			LzNonce:         5, // arbitrary
+			TxNonce:         5, // arbitrary
 			AssetsAddress:   assetAddr.Bytes(),
 			StakerAddress:   staker.Bytes(),
 			OperatorAddress: operatorAddress,
@@ -235,7 +235,7 @@ func (suite *KeeperTestSuite) TestDifferentEpochOperations() {
 		// delegate
 		delegationParams := &delegationtypes.DelegationOrUndelegationParams{
 			ClientChainID:   lzID,
-			LzNonce:         5, // arbitrary
+			TxNonce:         5, // arbitrary
 			AssetsAddress:   assetAddr.Bytes(),
 			StakerAddress:   staker.Bytes(),
 			OperatorAddress: operatorAddress,

@@ -3,6 +3,7 @@ package types
 import (
 	sdkmath "cosmossdk.io/math"
 	assetstype "github.com/ExocoreNetwork/exocore/x/assets/types"
+	epochsTypes "github.com/ExocoreNetwork/exocore/x/epochs/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -39,9 +40,7 @@ type DelegationHooks interface {
 
 type OperatorKeeper interface {
 	IsOperator(ctx sdk.Context, addr sdk.AccAddress) bool
-	GetUnbondingExpirationBlockNumber(ctx sdk.Context, OperatorAddress sdk.AccAddress, startHeight uint64) uint64
-
-	// UpdateOptedInAssetsState(ctx sdk.Context, assetID, operatorAddr string, opAmount sdkmath.Int) error
+	GetUnbondingExpiration(ctx sdk.Context, operator sdk.AccAddress) (string, int64, error)
 }
 
 type AssetsKeeper interface {
@@ -62,4 +61,9 @@ type BankKeeper interface {
 
 type AccountKeeper interface {
 	GetSequence(ctx sdk.Context, addr sdk.AccAddress) (uint64, error)
+}
+
+// EpochsKeeper represents the expected keeper interface for the epochs module.
+type EpochsKeeper interface {
+	GetEpochInfo(sdk.Context, string) (epochsTypes.EpochInfo, bool)
 }

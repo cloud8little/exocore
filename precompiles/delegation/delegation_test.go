@@ -313,7 +313,7 @@ func (s *DelegationPrecompileSuite) TestRunUnDelegate() {
 			StakerAddress: staker,
 			AssetsAddress: usdtAddress,
 			OpAmount:      delegateAmount,
-			LzNonce:       lzNonce,
+			TxNonce:       lzNonce,
 		}
 		opAccAddr, err := sdk.AccAddressFromBech32(operatorAddr)
 		s.Require().NoError(err)

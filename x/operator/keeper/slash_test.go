@@ -56,7 +56,8 @@ func (suite *OperatorTestSuite) TestSlashWithInfractionReason() {
 	suite.prepareDelegation(false, suite.Address, suite.assetAddr, suite.operatorAddr, undelegationAmount)
 	delegationRemaining := delegationAmount.Add(newDelegateAmount).Sub(undelegationAmount)
 	startHeight := uint64(suite.Ctx.BlockHeight())
-	completedHeight := suite.App.OperatorKeeper.GetUnbondingExpirationBlockNumber(suite.Ctx, suite.operatorAddr, startHeight)
+	completedEpochId, completedEpochNumber, err := suite.App.OperatorKeeper.GetUnbondingExpiration(suite.Ctx, suite.operatorAddr)
+	suite.NoError(err)
 
 	// trigger the slash with a downtime event
 	// run to next block

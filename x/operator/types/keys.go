@@ -28,8 +28,6 @@ const (
 
 	SlashVetoDuration = int64(1000)
 
-	UnbondingExpiration = 10
-
 	// AccAddressLength is used to parse the key, because the length isn't padded in the key
 	// This might be removed if the address length is padded in the key
 	AccAddressLength = 20

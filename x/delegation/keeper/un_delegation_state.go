@@ -32,29 +32,32 @@ func (k Keeper) AllUndelegations(ctx sdk.Context) (undelegations []types.Undeleg
 // SetUndelegationRecords stores the provided undelegation records.
 // The records are stored with 3 different keys:
 // (1) recordKey == blockNumber + lzNonce + txHash + operatorAddress => record
-// (2) stakerID + assetID + lzNonce => recordKey
-// (3) completeBlockNumber + lzNonce => recordKey
+// (2) operatorAccAddr + stakerID + assetID + lzNonce => recordKey
+// (3) epochIdentifierLength + completedEpochIdentifier + completedEpochNumber + TxNonce => recordKey
 // If a record exists with the same key, it will be overwritten; however, that is not a big
 // concern since the lzNonce and txHash are unique for each record.
 func (k *Keeper) SetUndelegationRecords(ctx sdk.Context, records []types.UndelegationRecord) error {
 	singleRecordStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixUndelegationInfo)
 	stakerUndelegationStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixStakerUndelegationInfo)
 	pendingUndelegationStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixPendingUndelegations)
-	currentHeight := ctx.BlockHeight()
 	for i := range records {
 		record := records[i]
-		if record.CompleteBlockNumber < uint64(currentHeight) {
-			return errorsmod.Wrapf(types.ErrInvalidCompletedHeight, "currentHeight:%d,CompleteBlockNumber:%d", currentHeight, record.CompleteBlockNumber)
+		epochInfo, exist := k.epochsKeeper.GetEpochInfo(ctx, record.CompletedEpochIdentifier)
+		if !exist {
+			return errorsmod.Wrapf(types.ErrEpochIdentifierNotExist, "identifier:%s", record.CompletedEpochIdentifier)
+		}
+		if record.CompletedEpochNumber < epochInfo.CurrentEpoch {
+			return errorsmod.Wrapf(types.ErrInvalidCompletionEpoch, "epochIdentifier:%s,currentEpochNumber:%d,CompleteEpochNumber:%d", record.CompletedEpochIdentifier, epochInfo.CurrentEpoch, record.CompletedEpochNumber)
 		}
 		bz := k.cdc.MustMarshal(&record)
 		// todo: check if the following state can only be set once?
-		singleRecKey := types.GetUndelegationRecordKey(record.BlockNumber, record.LzTxNonce, record.TxHash, record.OperatorAddr)
+		singleRecKey := types.GetUndelegationRecordKey(record.BlockNumber, record.TxNonce, record.TxHash, record.OperatorAddr)
 		singleRecordStore.Set(singleRecKey, bz)
 
-		stakerKey := types.GetStakerUndelegationRecordKey(record.StakerId, record.AssetId, record.LzTxNonce)
+		stakerKey := types.GetStakerUndelegationRecordKey(record.StakerId, record.AssetId, record.TxNonce)
 		stakerUndelegationStore.Set(stakerKey, singleRecKey)
 
-		pendingUndelegationKey := types.GetPendingUndelegationRecordKey(record.CompleteBlockNumber, record.LzTxNonce)
+		pendingUndelegationKey := types.GetPendingUndelegationRecordKey(record.CompletedEpochIdentifier, record.CompletedEpochNumber, record.TxNonce)
 		pendingUndelegationStore.Set(pendingUndelegationKey, singleRecKey)
 	}
 	return nil
@@ -67,13 +70,13 @@ func (k *Keeper) DeleteUndelegationRecord(ctx sdk.Context, record *types.Undeleg
 	stakerUndelegationStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixStakerUndelegationInfo)
 	pendingUndelegationStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixPendingUndelegations)
 
-	singleRecKey := types.GetUndelegationRecordKey(record.BlockNumber, record.LzTxNonce, record.TxHash, record.OperatorAddr)
+	singleRecKey := types.GetUndelegationRecordKey(record.BlockNumber, record.TxNonce, record.TxHash, record.OperatorAddr)
 	singleRecordStore.Delete(singleRecKey)
 
 	stakerKey := types.GetStakerUndelegationRecordKey(record.StakerId, record.AssetId, record.LzTxNonce)
 	stakerUndelegationStore.Delete(stakerKey)
 
-	pendingUndelegationKey := types.GetPendingUndelegationRecordKey(record.CompleteBlockNumber, record.LzTxNonce)
+	pendingUndelegationKey := types.GetPendingUndelegationRecordKey(record.CompletedEpochIdentifier, record.CompletedEpochNumber, record.TxNonce)
 	pendingUndelegationStore.Delete(pendingUndelegationKey)
 	return nil
 }

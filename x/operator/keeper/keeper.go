@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-
 	sdkmath "cosmossdk.io/math"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
@@ -23,6 +22,7 @@ type Keeper struct {
 	stakingKeeper    operatortypes.StakingKeeper
 	hooks            operatortypes.OperatorHooks // set separately via call to SetHooks
 	slashKeeper      operatortypes.SlashKeeper   // for jailing and unjailing check TODO(mm)
+	epochsKeeper     operatortypes.EpochsKeeper
 }
 
 func NewKeeper(
@@ -34,6 +34,7 @@ func NewKeeper(
 	avsKeeper operatortypes.AVSKeeper,
 	stakingKeeper operatortypes.StakingKeeper,
 	slashKeeper operatortypes.SlashKeeper,
+	epochsKeeper operatortypes.EpochsKeeper,
 ) Keeper {
 	return Keeper{
 		storeKey:         storeKey,
@@ -44,15 +45,12 @@ func NewKeeper(
 		avsKeeper:        avsKeeper,
 		stakingKeeper:    stakingKeeper,
 		slashKeeper:      slashKeeper,
+		epochsKeeper:     epochsKeeper,
 	}
 }
 
 func (k *Keeper) OracleInterface() operatortypes.OracleKeeper {
 	return k.oracleKeeper
-}
-
-func (k Keeper) GetUnbondingExpirationBlockNumber(_ sdk.Context, _ sdk.AccAddress, startHeight uint64) uint64 {
-	return startHeight + operatortypes.UnbondingExpiration
 }
 
 // OperatorKeeper interface will be implemented by deposit keeper
@@ -62,7 +60,7 @@ type OperatorKeeper interface {
 
 	IsOperator(ctx sdk.Context, addr sdk.AccAddress) bool
 
-	GetUnbondingExpirationBlockNumber(ctx sdk.Context, OperatorAddress sdk.AccAddress, startHeight uint64) uint64
+	GetUnbondingExpiration(ctx sdk.Context, OperatorAddress sdk.AccAddress, startHeight uint64) uint64
 
 	OptIn(ctx sdk.Context, operatorAddress sdk.AccAddress, AVSAddr string) error
 

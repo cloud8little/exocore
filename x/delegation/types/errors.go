@@ -83,8 +83,12 @@ var (
 		ModuleName, 18,
 		"assetID is invalid",
 	)
-	ErrInvalidCompletedHeight = errorsmod.Register(
+	ErrInvalidCompletionEpoch = errorsmod.Register(
 		ModuleName, 23,
-		"the block height to complete the unelegation is invalid",
+		"the epoch number to complete the unelegation is invalid",
+	)
+	ErrEpochIdentifierNotExist = errorsmod.Register(
+		ModuleName, 24,
+		"the epoch identifier doesn't exist",
 	)
 )
