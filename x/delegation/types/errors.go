@@ -91,4 +91,9 @@ var (
 		ModuleName, 24,
 		"the epoch identifier doesn't exist",
 	)
+
+	ErrCannotIncUndelegationID = errorsmod.Register(
+		ModuleName, 25,
+		"cannot increment undelegation ID above max uint64",
+	)
 )

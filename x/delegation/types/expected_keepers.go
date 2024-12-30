@@ -65,5 +65,6 @@ type AccountKeeper interface {
 
 // EpochsKeeper represents the expected keeper interface for the epochs module.
 type EpochsKeeper interface {
-	GetEpochInfo(sdk.Context, string) (epochsTypes.EpochInfo, bool)
+	GetEpochInfo(ctx sdk.Context, epochIdentifier string) (epochsTypes.EpochInfo, bool)
+	AllEpochInfos(ctx sdk.Context) []epochsTypes.EpochInfo
 }

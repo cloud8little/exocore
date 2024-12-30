@@ -52,7 +52,7 @@ func (suite *KeeperTestSuite) TestUndelegations() {
 	// delegate
 	delegationParams := &delegationtypes.DelegationOrUndelegationParams{
 		ClientChainID:   lzID,
-		TxNonce:         5, // arbitrary
+		UndelegationID:  5, // arbitrary
 		AssetsAddress:   assetAddr.Bytes(),
 		StakerAddress:   staker.Bytes(),
 		OperatorAddress: operatorAddress,
@@ -84,7 +84,7 @@ func (suite *KeeperTestSuite) TestUndelegations() {
 	txHash := common.BytesToHash([]byte("txhash1")) // not validated
 	undelegationParams := &delegationtypes.DelegationOrUndelegationParams{
 		ClientChainID:   lzID,
-		TxNonce:         lzNonce, // arbitrary
+		UndelegationID:  lzNonce, // arbitrary
 		AssetsAddress:   assetAddr.Bytes(),
 		StakerAddress:   staker.Bytes(),
 		OperatorAddress: operatorAddress,
@@ -127,7 +127,7 @@ func (suite *KeeperTestSuite) TestUndelegations() {
 	txHash = common.BytesToHash([]byte("txhash2")) // not validated
 	undelegationParams = &delegationtypes.DelegationOrUndelegationParams{
 		ClientChainID:   lzID,
-		TxNonce:         lzNonce, // arbitrary
+		UndelegationID:  lzNonce, // arbitrary
 		AssetsAddress:   assetAddr.Bytes(),
 		StakerAddress:   staker.Bytes(),
 		OperatorAddress: operatorAddress,
@@ -192,7 +192,7 @@ func (suite *KeeperTestSuite) TestUndelegationEdgeCases() {
 	// delegate
 	delegationParams := &delegationtypes.DelegationOrUndelegationParams{
 		ClientChainID:   lzID,
-		TxNonce:         5, // arbitrary
+		UndelegationID:  5, // arbitrary
 		AssetsAddress:   assetAddr.Bytes(),
 		StakerAddress:   staker.Bytes(),
 		OperatorAddress: operatorAddress,
@@ -210,7 +210,7 @@ func (suite *KeeperTestSuite) TestUndelegationEdgeCases() {
 	txHash := common.BytesToHash([]byte("txhash1")) // not validated
 	undelegationParams := &delegationtypes.DelegationOrUndelegationParams{
 		ClientChainID:   lzID,
-		TxNonce:         5, // arbitrary
+		UndelegationID:  5, // arbitrary
 		AssetsAddress:   assetAddr.Bytes(),
 		StakerAddress:   staker.Bytes(),
 		OperatorAddress: operatorAddress,
@@ -243,7 +243,7 @@ func (suite *KeeperTestSuite) TestUndelegationEdgeCases() {
 	txHash = common.BytesToHash([]byte("txhash2")) // not validated
 	undelegationParams = &delegationtypes.DelegationOrUndelegationParams{
 		ClientChainID:   lzID,
-		TxNonce:         5, // arbitrary
+		UndelegationID:  5, // arbitrary
 		AssetsAddress:   assetAddr.Bytes(),
 		StakerAddress:   staker.Bytes(),
 		OperatorAddress: operatorAddress,
@@ -263,7 +263,7 @@ func (suite *KeeperTestSuite) TestUndelegationEdgeCases() {
 	txHash = common.BytesToHash([]byte("txhash3")) // not validated
 	undelegationParams = &delegationtypes.DelegationOrUndelegationParams{
 		ClientChainID:   lzID,
-		TxNonce:         5, // arbitrary
+		UndelegationID:  5, // arbitrary
 		AssetsAddress:   assetAddr.Bytes(),
 		StakerAddress:   staker.Bytes(),
 		OperatorAddress: operatorAddress,
@@ -294,7 +294,7 @@ func (suite *KeeperTestSuite) TestUndelegationEdgeCases() {
 	txHash = common.BytesToHash([]byte("txhash4")) // not validated
 	undelegationParams = &delegationtypes.DelegationOrUndelegationParams{
 		ClientChainID:   lzID,
-		TxNonce:         5, // arbitrary
+		UndelegationID:  5, // arbitrary
 		AssetsAddress:   assetAddr.Bytes(),
 		StakerAddress:   staker.Bytes(),
 		OperatorAddress: operatorAddress,

@@ -109,7 +109,7 @@ func (suite *KeeperTestSuite) prepare() {
 	// then delegate it
 	delegationParams := &delegationtypes.DelegationOrUndelegationParams{
 		ClientChainID:   lzID,
-		TxNonce:         5, // arbitrary
+		UndelegationID:  5, // arbitrary
 		AssetsAddress:   assetAddr.Bytes(),
 		StakerAddress:   staker.Bytes(),
 		OperatorAddress: operatorAddress,
@@ -139,7 +139,7 @@ func (suite *KeeperTestSuite) prepare() {
 	suite.CheckLengthOfValidatorUpdates(0, nil, "deposit above min but don't delegate")
 	delegationParams = &delegationtypes.DelegationOrUndelegationParams{
 		ClientChainID:   lzID,
-		TxNonce:         5, // arbitrary
+		UndelegationID:  5, // arbitrary
 		AssetsAddress:   assetAddr.Bytes(),
 		StakerAddress:   staker.Bytes(),
 		OperatorAddress: operatorAddress,

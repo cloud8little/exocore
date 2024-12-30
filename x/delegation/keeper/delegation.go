@@ -131,13 +131,14 @@ func (k *Keeper) UndelegateFrom(ctx sdk.Context, params *delegationtype.Delegati
 	if err != nil {
 		return err
 	}
+	undelegationID := k.GetUndelegationID(ctx)
 	// record Undelegation event
 	r := delegationtype.UndelegationRecord{
 		StakerId:              stakerID,
 		AssetId:               assetID,
 		OperatorAddr:          params.OperatorAddress.String(),
 		TxHash:                params.TxHash.String(),
-		TxNonce:               params.TxNonce,
+		UndelegationId:        undelegationID,
 		BlockNumber:           uint64(ctx.BlockHeight()),
 		Amount:                removeToken,
 		ActualCompletedAmount: removeToken,
@@ -152,9 +153,12 @@ func (k *Keeper) UndelegateFrom(ctx sdk.Context, params *delegationtype.Delegati
 	if err != nil {
 		return err
 	}
-
+	err = k.IncrementUndelegationID(ctx)
+	if err != nil {
+		return err
+	}
 	// call the hooks registered by the other modules
-	return k.Hooks().AfterUndelegationStarted(ctx, params.OperatorAddress, delegationtype.GetUndelegationRecordKey(r.BlockNumber, r.TxNonce, r.TxHash, r.OperatorAddr))
+	return k.Hooks().AfterUndelegationStarted(ctx, params.OperatorAddress, delegationtype.GetUndelegationRecordKey(r.BlockNumber, r.UndelegationId, r.TxHash, r.OperatorAddr))
 }
 
 // AssociateOperatorWithStaker marks that a staker is claiming to be associated with an operator.

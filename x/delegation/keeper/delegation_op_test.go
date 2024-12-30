@@ -49,7 +49,6 @@ func (suite *DelegationTestSuite) prepareDelegation(delegationAmount sdkmath.Int
 		OperatorAddress: operator,
 		StakerAddress:   suite.Address[:],
 		OpAmount:        delegationAmount,
-		TxNonce:         0,
 		TxHash:          common.HexToHash("0x24c4a315d757249c12a7a1d7b6fb96261d49deee26f06a3e1787d008b445c3ac"),
 	}
 	registerReq := &operatortype.RegisterOperatorReq{
@@ -74,7 +73,6 @@ func (suite *DelegationTestSuite) prepareDelegationNativeToken() *delegationtype
 		OperatorAddress: suite.opAccAddr,
 		StakerAddress:   suite.accAddr[:],
 		OpAmount:        suite.delegationAmount,
-		TxNonce:         0,
 		TxHash:          common.HexToHash("0x24c4a315d757249c12a7a1d7b6fb96261d49deee26f06a3e1787d008b445c3ac"),
 	}
 	err := suite.App.DelegationKeeper.DelegateTo(suite.Ctx, delegationEvent)
@@ -94,7 +92,6 @@ func (suite *DelegationTestSuite) TestDelegateTo() {
 		OperatorAddress: opAccAddr,
 		StakerAddress:   suite.Address[:],
 		OpAmount:        sdkmath.NewInt(50),
-		TxNonce:         0,
 		TxHash:          common.HexToHash("0x24c4a315d757249c12a7a1d7b6fb96261d49deee26f06a3e1787d008b445c3ac"),
 	}
 	err = suite.App.DelegationKeeper.DelegateTo(suite.Ctx, delegationParams)
@@ -150,7 +147,6 @@ func (suite *DelegationTestSuite) TestDelegateTo() {
 		OperatorAddress: opAccAddr,
 		StakerAddress:   suite.accAddr[:],
 		OpAmount:        sdkmath.NewInt(50),
-		TxNonce:         0,
 		TxHash:          common.HexToHash("0x24c4a315d757249c12a7a1d7b6fb96261d49deee26f06a3e1787d008b445c3ac"),
 	}
 	err = suite.App.DelegationKeeper.DelegateTo(suite.Ctx, delegationParams)
@@ -191,7 +187,6 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 	suite.prepareDeposit(suite.depositAmount)
 	delegationEvent := suite.prepareDelegation(suite.delegationAmount, suite.opAccAddr)
 	// test Undelegation
-	delegationEvent.TxNonce = 1
 	err := suite.App.DelegationKeeper.UndelegateFrom(suite.Ctx, delegationEvent)
 	suite.NoError(err)
 
@@ -233,9 +228,7 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 		AssetId:               assetID,
 		OperatorAddr:          delegationEvent.OperatorAddress.String(),
 		TxHash:                delegationEvent.TxHash.String(),
-		IsPending:             true,
 		BlockNumber:           uint64(suite.Ctx.BlockHeight()),
-		LzTxNonce:             delegationEvent.TxNonce,
 		Amount:                delegationEvent.OpAmount,
 		ActualCompletedAmount: delegationEvent.OpAmount,
 	}
@@ -243,7 +236,7 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 	suite.Equal(UndelegationRecord, records[0])
 
 	suite.Ctx.Logger().Info("the complete block number is:", "height", UndelegationRecord.CompleteBlockNumber)
-	waitUndelegationRecords, err := suite.App.DelegationKeeper.GetPendingUndelegationRecords(suite.Ctx, UndelegationRecord.CompleteBlockNumber)
+	waitUndelegationRecords, err := suite.App.DelegationKeeper.GetCompletablePendingUndelegations(suite.Ctx, UndelegationRecord.CompleteBlockNumber)
 	suite.NoError(err)
 	suite.Equal(1, len(waitUndelegationRecords))
 	suite.Equal(UndelegationRecord, waitUndelegationRecords[0])
@@ -292,9 +285,7 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 		AssetId:               assetID,
 		OperatorAddr:          delegationEvent.OperatorAddress.String(),
 		TxHash:                delegationEvent.TxHash.String(),
-		IsPending:             true,
 		BlockNumber:           uint64(suite.Ctx.BlockHeight()),
-		LzTxNonce:             delegationEvent.TxNonce,
 		Amount:                delegationEvent.OpAmount,
 		ActualCompletedAmount: delegationEvent.OpAmount,
 	}
@@ -302,7 +293,7 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 	suite.Equal(UndelegationRecord, records[0])
 
 	suite.Ctx.Logger().Info("the complete block number is:", "height", UndelegationRecord.CompleteBlockNumber)
-	waitUndelegationRecords, err = suite.App.DelegationKeeper.GetPendingUndelegationRecords(suite.Ctx, UndelegationRecord.CompleteBlockNumber)
+	waitUndelegationRecords, err = suite.App.DelegationKeeper.GetCompletablePendingUndelegations(suite.Ctx, UndelegationRecord.CompleteBlockNumber)
 	suite.NoError(err)
 	suite.Equal(2, len(waitUndelegationRecords))
 	suite.Equal(UndelegationRecord, waitUndelegationRecords[0])
@@ -319,7 +310,6 @@ func (suite *DelegationTestSuite) TestCompleteUndelegation() {
 	suite.prepareDeposit(suite.depositAmount)
 	delegationEvent := suite.prepareDelegation(suite.delegationAmount, suite.opAccAddr)
 
-	delegationEvent.TxNonce = 1
 	err := suite.App.DelegationKeeper.UndelegateFrom(suite.Ctx, delegationEvent)
 	suite.NoError(err)
 	UndelegateHeight := suite.Ctx.BlockHeight()
@@ -378,7 +368,7 @@ func (suite *DelegationTestSuite) TestCompleteUndelegation() {
 	suite.NoError(err)
 	suite.Equal(0, len(records))
 
-	waitUndelegationRecords, err := suite.App.DelegationKeeper.GetPendingUndelegationRecords(suite.Ctx, uint64(completeBlockNumber))
+	waitUndelegationRecords, err := suite.App.DelegationKeeper.GetCompletablePendingUndelegations(suite.Ctx, uint64(completeBlockNumber))
 	suite.NoError(err)
 	suite.Equal(0, len(waitUndelegationRecords))
 
@@ -446,7 +436,7 @@ func (suite *DelegationTestSuite) TestCompleteUndelegation() {
 	suite.NoError(err)
 	suite.Equal(0, len(records))
 
-	waitUndelegationRecords, err = suite.App.DelegationKeeper.GetPendingUndelegationRecords(suite.Ctx, uint64(completeBlockNumber))
+	waitUndelegationRecords, err = suite.App.DelegationKeeper.GetCompletablePendingUndelegations(suite.Ctx, uint64(completeBlockNumber))
 	suite.NoError(err)
 	suite.Equal(0, len(waitUndelegationRecords))
 }
