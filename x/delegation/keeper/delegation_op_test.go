@@ -236,11 +236,11 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 		CompletedEpochIdentifier: delegationtype.NullEpochIdentifier,
 		CompletedEpochNumber:     delegationtype.NullEpochNumber,
 	}
-	suite.Equal(UndelegationRecord, records[0])
+	suite.Equal(UndelegationRecord, records[0].Undelegation)
 	waitUndelegationRecords, err := suite.App.DelegationKeeper.GetUnCompletableUndelegations(suite.Ctx, delegationtype.NullEpochIdentifier, delegationtype.NullEpochNumber)
 	suite.NoError(err)
 	suite.Equal(1, len(waitUndelegationRecords))
-	suite.Equal(UndelegationRecord, waitUndelegationRecords[0])
+	suite.Equal(UndelegationRecord, waitUndelegationRecords[0].Undelegation)
 
 	// undelegate exocore-native-token
 	delegationEvent = suite.prepareDelegationNativeToken()
@@ -293,12 +293,12 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 		CompletedEpochNumber:     delegationtype.NullEpochNumber,
 		UndelegationId:           initialUndelegationID + 1,
 	}
-	suite.Equal(UndelegationRecord, records[0])
+	suite.Equal(UndelegationRecord, records[0].Undelegation)
 
 	waitUndelegationRecords, err = suite.App.DelegationKeeper.GetUnCompletableUndelegations(suite.Ctx, delegationtype.NullEpochIdentifier, delegationtype.NullEpochNumber)
 	suite.NoError(err)
 	suite.Equal(2, len(waitUndelegationRecords))
-	suite.Equal(UndelegationRecord, waitUndelegationRecords[0])
+	suite.Equal(UndelegationRecord, waitUndelegationRecords[0].Undelegation)
 }
 
 func (suite *DelegationTestSuite) TestCompleteUndelegation() {

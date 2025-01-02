@@ -51,7 +51,7 @@ func (suite *DelegationTestSuite) TestUpdateNSTBalance() {
 	// check the undelegation state after slashing
 	records, err := suite.App.DelegationKeeper.GetStakerUndelegationRecords(suite.Ctx, stakerID, assetID)
 	suite.NoError(err)
-	suite.Equal(sdkmath.ZeroInt(), records[0].ActualCompletedAmount)
+	suite.Equal(sdkmath.ZeroInt(), records[0].Undelegation.ActualCompletedAmount)
 
 	// check the delegated share for two operators
 	delegationForDefaultOperator, err := suite.App.DelegationKeeper.GetSingleDelegationInfo(suite.Ctx, stakerID, assetID, suite.opAccAddr.String())

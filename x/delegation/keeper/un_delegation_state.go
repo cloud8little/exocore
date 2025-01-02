@@ -101,9 +101,9 @@ func (k *Keeper) DeleteUndelegationRecord(ctx sdk.Context, record *types.Undeleg
 }
 
 // GetUndelegationRecords returns the undelegation records for the provided record keys.
-func (k *Keeper) GetUndelegationRecords(ctx sdk.Context, singleRecordKeys [][]byte) (record []*types.UndelegationRecord, err error) {
+func (k *Keeper) GetUndelegationRecords(ctx sdk.Context, singleRecordKeys [][]byte) (record []*types.UndelegationRecordWithHoldCount, err error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixUndelegationInfo)
-	ret := make([]*types.UndelegationRecord, 0)
+	ret := make([]*types.UndelegationRecordWithHoldCount, 0)
 	for _, singleRecordKey := range singleRecordKeys {
 		value := store.Get(singleRecordKey)
 		if value == nil {
@@ -111,7 +111,11 @@ func (k *Keeper) GetUndelegationRecords(ctx sdk.Context, singleRecordKeys [][]by
 		}
 		undelegationRecord := types.UndelegationRecord{}
 		k.cdc.MustUnmarshal(value, &undelegationRecord)
-		ret = append(ret, &undelegationRecord)
+		holdCount := k.GetUndelegationHoldCount(ctx, singleRecordKey)
+		ret = append(ret, &types.UndelegationRecordWithHoldCount{
+			Undelegation: &undelegationRecord,
+			HoldCount:    holdCount,
+		})
 	}
 	return ret, nil
 }
@@ -167,8 +171,14 @@ func (k *Keeper) GetStakerUndelegationRecKeys(ctx sdk.Context, stakerID, assetID
 	return ret, nil
 }
 
+func (k *Keeper) GetUndelegationRecKey(ctx sdk.Context, stakerID, assetID string, undelegationID uint64) (recordKey []byte, err error) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixStakerUndelegationInfo)
+	recordKey = store.Get(types.GetStakerUndelegationRecordKey(stakerID, assetID, undelegationID))
+	return recordKey, nil
+}
+
 // GetStakerUndelegationRecords returns the undelegation records for the provided staker and asset.
-func (k *Keeper) GetStakerUndelegationRecords(ctx sdk.Context, stakerID, assetID string) (records []*types.UndelegationRecord, err error) {
+func (k *Keeper) GetStakerUndelegationRecords(ctx sdk.Context, stakerID, assetID string) (records []*types.UndelegationRecordWithHoldCount, err error) {
 	recordKeys, err := k.GetStakerUndelegationRecKeys(ctx, stakerID, assetID)
 	if err != nil {
 		return nil, err
@@ -210,10 +220,14 @@ func (k *Keeper) IterateUndelegationsByStakerAndAsset(
 	return nil
 }
 
-func (k *Keeper) GetUnCompletableUndelegations(ctx sdk.Context, epochIdentifier string, epochNumber int64) ([]*types.UndelegationRecord, error) {
-	records := make([]*types.UndelegationRecord, 0)
-	expiredUndelegationOpFunc := func(_ []byte, record *types.UndelegationRecord) error {
-		records = append(records, record)
+func (k *Keeper) GetUnCompletableUndelegations(ctx sdk.Context, epochIdentifier string, epochNumber int64) ([]*types.UndelegationRecordWithHoldCount, error) {
+	records := make([]*types.UndelegationRecordWithHoldCount, 0)
+	expiredUndelegationOpFunc := func(recordKey []byte, record *types.UndelegationRecord) error {
+		holdCount := k.GetUndelegationHoldCount(ctx, recordKey)
+		records = append(records, &types.UndelegationRecordWithHoldCount{
+			Undelegation: record,
+			HoldCount:    holdCount,
+		})
 		return nil
 	}
 	err := k.IteratePendingUndelegations(ctx, false, epochIdentifier, epochNumber, expiredUndelegationOpFunc)

@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/ExocoreNetwork/exocore/utils"
@@ -10,7 +11,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 // constants
@@ -158,8 +158,9 @@ func ParseUndelegationRecordKey(key []byte) (field *UndelegationKeyFields, err e
 	}, nil
 }
 
-func GetStakerUndelegationRecordKey(stakerID, assetID string, lzNonce uint64) []byte {
-	return []byte(strings.Join([]string{stakerID, assetID, hexutil.EncodeUint64(lzNonce)}, "/"))
+func GetStakerUndelegationRecordKey(stakerID, assetID string, undelegationID uint64) []byte {
+	idStr := fmt.Sprintf("%021d", undelegationID)
+	return []byte(strings.Join([]string{stakerID, assetID, idStr}, "/"))
 }
 
 type PendingUndelegationKeyFields struct {

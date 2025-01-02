@@ -43,7 +43,11 @@ func (k *Keeper) QueryUndelegationsByEpochInfo(ctx context.Context, req *delegat
 
 func (k Keeper) QueryUndelegationHoldCount(ctx context.Context, req *delegationtype.UndelegationHoldCountReq) (*delegationtype.UndelegationHoldCountResponse, error) {
 	c := sdk.UnwrapSDKContext(ctx)
-	res := k.GetUndelegationHoldCount(c, []byte(req.RecordKey))
+	recordKey, err := k.GetUndelegationRecKey(c, req.StakerId, req.AssetId, req.UndelegationId)
+	if err != nil {
+		return nil, err
+	}
+	res := k.GetUndelegationHoldCount(c, recordKey)
 	return &delegationtype.UndelegationHoldCountResponse{HoldCount: res}, nil
 }
 

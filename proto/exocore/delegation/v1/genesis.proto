@@ -25,15 +25,6 @@ message GenesisState {
   uint64 undelegation_id = 5;
 }
 
-// UndelegationRecordWithHoldCount includes the undelegation record and the
-// hold count, which is used to construct the genesis state
-message UndelegationRecordWithHoldCount {
-    // undelegation is the single undelegation record
-    UndelegationRecord undelegation =1;
-    // hold_count represents the number of holds on this undelegation
-    uint64 hold_count =2;
-}
-
 // DelegationStates is a helper struct for the delegation state
 // used to construct the genesis state
 message DelegationStates {

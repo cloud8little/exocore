@@ -105,7 +105,7 @@ func (suite *OperatorTestSuite) TestSlashWithInfractionReason() {
 
 	undelegations, err := suite.App.DelegationKeeper.GetStakerUndelegationRecords(suite.Ctx, suite.stakerID, suite.assetID)
 	suite.NoError(err)
-	suite.Equal(undelegationAmount.Sub(slashInfo.ExecutionInfo.SlashUndelegations[0].Amount), undelegations[0].ActualCompletedAmount)
+	suite.Equal(undelegationAmount.Sub(slashInfo.ExecutionInfo.SlashUndelegations[0].Amount), undelegations[0].Undelegation.ActualCompletedAmount)
 
 	// run to the epoch at which the undelegation is completed
 	epochInfo, found = suite.App.EpochsKeeper.GetEpochInfo(suite.Ctx, completedEpochId)

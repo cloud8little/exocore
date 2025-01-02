@@ -189,19 +189,32 @@ func QueryUndelegationsByEpochInfo() *cobra.Command {
 // QueryUndelegationHoldCount queries undelegation hold count for a record key.
 func QueryUndelegationHoldCount() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "QueryUndelegationHoldCount <recordKey>",
+		Use:   "QueryUndelegationHoldCount <stakerID> <assetID> <undelegationID>",
 		Short: "Get undelegation hold count",
 		Long:  "Get undelegation hold count",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
-
+			_, _, err = types.ValidateID(args[0], false, false)
+			if err != nil {
+				return err
+			}
+			_, _, err = types.ValidateID(args[1], false, false)
+			if err != nil {
+				return err
+			}
+			undelegationID, err := strconv.ParseUint(args[1], 10, 64)
+			if err != nil {
+				return err
+			}
 			queryClient := delegationtype.NewQueryClient(clientCtx)
 			req := &delegationtype.UndelegationHoldCountReq{
-				RecordKey: strings.ToLower(args[0]),
+				StakerId:       strings.ToLower(args[0]),
+				AssetId:        strings.ToLower(args[1]),
+				UndelegationId: undelegationID,
 			}
 			res, err := queryClient.QueryUndelegationHoldCount(context.Background(), req)
 			if err != nil {
