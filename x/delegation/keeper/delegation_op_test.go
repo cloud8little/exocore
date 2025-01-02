@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	epochstypes "github.com/ExocoreNetwork/exocore/x/epochs/types"
+
 	errorsmod "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	assetskeeper "github.com/ExocoreNetwork/exocore/x/assets/keeper"
@@ -25,7 +27,7 @@ func (suite *DelegationTestSuite) basicPrepare() {
 	suite.opAccAddr = opAccAddr
 	suite.depositAmount = sdkmath.NewInt(100)
 	suite.delegationAmount = sdkmath.NewInt(50)
-	suite.accAddr = sdk.AccAddress(suite.Address.Bytes())
+	suite.accAddr = suite.Address.Bytes()
 }
 
 func (suite *DelegationTestSuite) prepareDeposit(depositAmount sdkmath.Int) *assetskeeper.DepositWithdrawParams {
@@ -187,6 +189,7 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 	suite.prepareDeposit(suite.depositAmount)
 	delegationEvent := suite.prepareDelegation(suite.delegationAmount, suite.opAccAddr)
 	// test Undelegation
+	initialUndelegationID := uint64(0)
 	err := suite.App.DelegationKeeper.UndelegateFrom(suite.Ctx, delegationEvent)
 	suite.NoError(err)
 
@@ -231,12 +234,15 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 		BlockNumber:           uint64(suite.Ctx.BlockHeight()),
 		Amount:                delegationEvent.OpAmount,
 		ActualCompletedAmount: delegationEvent.OpAmount,
+		UndelegationId:        initialUndelegationID,
 	}
-	UndelegationRecord.CompleteBlockNumber = UndelegationRecord.BlockNumber + delegationtype.CanUndelegationDelayHeight
+	UndelegationRecord.CompletedEpochIdentifier = epochstypes.MinuteEpochID
+	minuteEpochInfo, found := suite.App.EpochsKeeper.GetEpochInfo(suite.Ctx, epochstypes.MinuteEpochID)
+	suite.True(found)
+	UndelegationRecord.CompletedEpochNumber = minuteEpochInfo.CurrentEpoch + 1
 	suite.Equal(UndelegationRecord, records[0])
 
-	suite.Ctx.Logger().Info("the complete block number is:", "height", UndelegationRecord.CompleteBlockNumber)
-	waitUndelegationRecords, err := suite.App.DelegationKeeper.GetCompletablePendingUndelegations(suite.Ctx, UndelegationRecord.CompleteBlockNumber)
+	waitUndelegationRecords, err := suite.App.DelegationKeeper.GetUnCompletableUndelegations(suite.Ctx, minuteEpochInfo.Identifier, minuteEpochInfo.CurrentEpoch)
 	suite.NoError(err)
 	suite.Equal(1, len(waitUndelegationRecords))
 	suite.Equal(UndelegationRecord, waitUndelegationRecords[0])
@@ -281,19 +287,20 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 	suite.NoError(err)
 	suite.Equal(1, len(records))
 	UndelegationRecord = &delegationtype.UndelegationRecord{
-		StakerId:              stakerID,
-		AssetId:               assetID,
-		OperatorAddr:          delegationEvent.OperatorAddress.String(),
-		TxHash:                delegationEvent.TxHash.String(),
-		BlockNumber:           uint64(suite.Ctx.BlockHeight()),
-		Amount:                delegationEvent.OpAmount,
-		ActualCompletedAmount: delegationEvent.OpAmount,
+		StakerId:                 stakerID,
+		AssetId:                  assetID,
+		OperatorAddr:             delegationEvent.OperatorAddress.String(),
+		TxHash:                   delegationEvent.TxHash.String(),
+		BlockNumber:              uint64(suite.Ctx.BlockHeight()),
+		Amount:                   delegationEvent.OpAmount,
+		ActualCompletedAmount:    delegationEvent.OpAmount,
+		CompletedEpochIdentifier: minuteEpochInfo.Identifier,
+		CompletedEpochNumber:     minuteEpochInfo.CurrentEpoch + 1,
+		UndelegationId:           initialUndelegationID + 1,
 	}
-	UndelegationRecord.CompleteBlockNumber = UndelegationRecord.BlockNumber + delegationtype.CanUndelegationDelayHeight
 	suite.Equal(UndelegationRecord, records[0])
 
-	suite.Ctx.Logger().Info("the complete block number is:", "height", UndelegationRecord.CompleteBlockNumber)
-	waitUndelegationRecords, err = suite.App.DelegationKeeper.GetCompletablePendingUndelegations(suite.Ctx, UndelegationRecord.CompleteBlockNumber)
+	waitUndelegationRecords, err = suite.App.DelegationKeeper.GetUnCompletableUndelegations(suite.Ctx, minuteEpochInfo.Identifier, minuteEpochInfo.CurrentEpoch)
 	suite.NoError(err)
 	suite.Equal(2, len(waitUndelegationRecords))
 	suite.Equal(UndelegationRecord, waitUndelegationRecords[0])
@@ -312,13 +319,10 @@ func (suite *DelegationTestSuite) TestCompleteUndelegation() {
 
 	err := suite.App.DelegationKeeper.UndelegateFrom(suite.Ctx, delegationEvent)
 	suite.NoError(err)
-	UndelegateHeight := suite.Ctx.BlockHeight()
-	suite.Ctx.Logger().Info("the ctx block height is:", "height", UndelegateHeight)
 
 	// test complete Undelegation
-	completeBlockNumber := UndelegateHeight + int64(delegationtype.CanUndelegationDelayHeight)
-	suite.Ctx = suite.Ctx.WithBlockHeight(completeBlockNumber)
-
+	// run to next block
+	suite.Ctx = suite.Ctx.WithBlockHeight(suite.Ctx.BlockHeight() + 1)
 	// update epochs to mature pending delegations from dogfood
 	for i := 0; i < int(epochsUntilUnbonded); i++ {
 		epochEndTime := epochInfo.CurrentEpochStartTime.Add(epochInfo.Duration)
@@ -328,10 +332,8 @@ func (suite *DelegationTestSuite) TestCompleteUndelegation() {
 	}
 
 	suite.Equal(epochInfo.CurrentEpoch, matureEpochs)
-
 	// update epochs to mature pending delegations from exocore-native-token by decrementing holdcount
 	suite.App.StakingKeeper.EndBlock(suite.Ctx)
-
 	suite.App.DelegationKeeper.EndBlock(suite.Ctx, abci.RequestEndBlock{})
 
 	// check state
@@ -368,7 +370,7 @@ func (suite *DelegationTestSuite) TestCompleteUndelegation() {
 	suite.NoError(err)
 	suite.Equal(0, len(records))
 
-	waitUndelegationRecords, err := suite.App.DelegationKeeper.GetCompletablePendingUndelegations(suite.Ctx, uint64(completeBlockNumber))
+	waitUndelegationRecords, err := suite.App.DelegationKeeper.GetCompletableUndelegations(suite.Ctx)
 	suite.NoError(err)
 	suite.Equal(0, len(waitUndelegationRecords))
 
@@ -376,12 +378,10 @@ func (suite *DelegationTestSuite) TestCompleteUndelegation() {
 	delegationEvent = suite.prepareDelegationNativeToken()
 	err = suite.App.DelegationKeeper.UndelegateFrom(suite.Ctx, delegationEvent)
 	suite.NoError(err)
-	UndelegateHeight = suite.Ctx.BlockHeight()
-	suite.Ctx.Logger().Info("the ctx block height is:", "height", UndelegateHeight)
 
 	// test complete Undelegation
-	completeBlockNumber = UndelegateHeight + int64(delegationtype.CanUndelegationDelayHeight)
-	suite.Ctx = suite.Ctx.WithBlockHeight(completeBlockNumber)
+	// run to next block
+	suite.Ctx = suite.Ctx.WithBlockHeight(suite.Ctx.BlockHeight() + 1)
 
 	epochID = suite.App.StakingKeeper.GetEpochIdentifier(suite.Ctx)
 	epochInfo, _ = suite.App.EpochsKeeper.GetEpochInfo(suite.Ctx, epochID)
@@ -436,7 +436,7 @@ func (suite *DelegationTestSuite) TestCompleteUndelegation() {
 	suite.NoError(err)
 	suite.Equal(0, len(records))
 
-	waitUndelegationRecords, err = suite.App.DelegationKeeper.GetCompletablePendingUndelegations(suite.Ctx, uint64(completeBlockNumber))
+	waitUndelegationRecords, err = suite.App.DelegationKeeper.GetCompletableUndelegations(suite.Ctx)
 	suite.NoError(err)
 	suite.Equal(0, len(waitUndelegationRecords))
 }

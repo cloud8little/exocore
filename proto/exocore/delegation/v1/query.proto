@@ -89,11 +89,13 @@ message UndelegationsReq {
   string asset_id = 2;
 }
 
-// UndelegationsByHeightReq is the request to obtain all undelegations waiting to be completed
-// by height.
-message UndelegationsByHeightReq {
-  // block_height is the block height to query.
-  uint64 block_height = 1;
+// UndelegationsByEpochInfoReq is the request to obtain all undelegations waiting to be completed
+// by epoch info.
+message UndelegationsByEpochInfoReq {
+  // epoch_identifier is the epoch identifier to query.
+  string epoch_identifier = 1;
+  // epoch_number is the epoch number to query.
+  int64 epoch_number = 2;
 }
 
 // UndelegationRecordList is the response to query undelegations.
@@ -169,9 +171,9 @@ service Query {
     option (google.api.http).get = "/exocore/delegation/v1/undelegations/{staker_id}/{asset_id}";
   }
 
-  // QueryUndelegationsByHeight queries all undelegations waiting to be completed by
-  // {height}.
-  rpc QueryUndelegationsByHeight(UndelegationsByHeightReq) returns (UndelegationRecordList) {
+  // QueryUndelegationsByEpochInfo queries all undelegations waiting to be completed by
+  // {epoch_identifier,epoch_number}.
+  rpc QueryUndelegationsByEpochInfo(UndelegationsByEpochInfoReq) returns (UndelegationRecordList) {
     option (cosmos.query.v1.module_query_safe) = true;
     option (google.api.http).get = "/exocore/delegation/v1/pending_undelegations/{block_height}";
   }

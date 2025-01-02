@@ -36,9 +36,9 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 // by staker id and asset id.
 type DelegationInfoReq struct {
 	// staker_id is the staker id.
-	StakerId string `protobuf:"bytes,1,opt,name=staker_id,json=stakerId,proto3" json:"staker_id,omitempty"`
+	StakerID string `protobuf:"bytes,1,opt,name=staker_id,json=stakerId,proto3" json:"staker_id,omitempty"`
 	// asset_id is the asset id.
-	AssetId string `protobuf:"bytes,2,opt,name=asset_id,json=assetId,proto3" json:"asset_id,omitempty"`
+	AssetID string `protobuf:"bytes,2,opt,name=asset_id,json=assetId,proto3" json:"asset_id,omitempty"`
 }
 
 func (m *DelegationInfoReq) Reset()         { *m = DelegationInfoReq{} }
@@ -74,16 +74,16 @@ func (m *DelegationInfoReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_DelegationInfoReq proto.InternalMessageInfo
 
-func (m *DelegationInfoReq) GetStakerId() string {
+func (m *DelegationInfoReq) GetStakerID() string {
 	if m != nil {
-		return m.StakerId
+		return m.StakerID
 	}
 	return ""
 }
 
-func (m *DelegationInfoReq) GetAssetId() string {
+func (m *DelegationInfoReq) GetAssetID() string {
 	if m != nil {
-		return m.AssetId
+		return m.AssetID
 	}
 	return ""
 }
@@ -235,11 +235,11 @@ func (m *QueryDelegationInfoResponse) GetDelegationInfos() map[string]*Delegatio
 // SingleDelegationInfoReq is the request to obtain the single delegation information.
 type SingleDelegationInfoReq struct {
 	// staker_id is the staker id.
-	StakerId string `protobuf:"bytes,1,opt,name=staker_id,json=stakerId,proto3" json:"staker_id,omitempty"`
+	StakerID string `protobuf:"bytes,1,opt,name=staker_id,json=stakerId,proto3" json:"staker_id,omitempty"`
 	// operator_addr is the operator address.
 	OperatorAddr string `protobuf:"bytes,2,opt,name=operator_addr,json=operatorAddr,proto3" json:"operator_addr,omitempty"`
 	// asset_id is the asset id.
-	AssetId string `protobuf:"bytes,3,opt,name=asset_id,json=assetId,proto3" json:"asset_id,omitempty"`
+	AssetID string `protobuf:"bytes,3,opt,name=asset_id,json=assetId,proto3" json:"asset_id,omitempty"`
 }
 
 func (m *SingleDelegationInfoReq) Reset()         { *m = SingleDelegationInfoReq{} }
@@ -275,9 +275,9 @@ func (m *SingleDelegationInfoReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SingleDelegationInfoReq proto.InternalMessageInfo
 
-func (m *SingleDelegationInfoReq) GetStakerId() string {
+func (m *SingleDelegationInfoReq) GetStakerID() string {
 	if m != nil {
-		return m.StakerId
+		return m.StakerID
 	}
 	return ""
 }
@@ -289,9 +289,9 @@ func (m *SingleDelegationInfoReq) GetOperatorAddr() string {
 	return ""
 }
 
-func (m *SingleDelegationInfoReq) GetAssetId() string {
+func (m *SingleDelegationInfoReq) GetAssetID() string {
 	if m != nil {
-		return m.AssetId
+		return m.AssetID
 	}
 	return ""
 }
@@ -392,9 +392,9 @@ func (m *UndelegationHoldCountResponse) GetHoldCount() uint64 {
 // by staker id and asset id.
 type UndelegationsReq struct {
 	// staker_id is the staker id.
-	StakerId string `protobuf:"bytes,1,opt,name=staker_id,json=stakerId,proto3" json:"staker_id,omitempty"`
+	StakerID string `protobuf:"bytes,1,opt,name=staker_id,json=stakerId,proto3" json:"staker_id,omitempty"`
 	// asset_id is the asset id.
-	AssetId string `protobuf:"bytes,2,opt,name=asset_id,json=assetId,proto3" json:"asset_id,omitempty"`
+	AssetID string `protobuf:"bytes,2,opt,name=asset_id,json=assetId,proto3" json:"asset_id,omitempty"`
 }
 
 func (m *UndelegationsReq) Reset()         { *m = UndelegationsReq{} }
@@ -430,39 +430,41 @@ func (m *UndelegationsReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_UndelegationsReq proto.InternalMessageInfo
 
-func (m *UndelegationsReq) GetStakerId() string {
+func (m *UndelegationsReq) GetStakerID() string {
 	if m != nil {
-		return m.StakerId
+		return m.StakerID
 	}
 	return ""
 }
 
-func (m *UndelegationsReq) GetAssetId() string {
+func (m *UndelegationsReq) GetAssetID() string {
 	if m != nil {
-		return m.AssetId
+		return m.AssetID
 	}
 	return ""
 }
 
-// UndelegationsByHeightReq is the request to obtain all undelegations waiting to be completed
-// by height.
-type UndelegationsByHeightReq struct {
-	// block_height is the block height to query.
-	BlockHeight uint64 `protobuf:"varint,1,opt,name=block_height,json=blockHeight,proto3" json:"block_height,omitempty"`
+// UndelegationsByEpochInfoReq is the request to obtain all undelegations waiting to be completed
+// by epoch info.
+type UndelegationsByEpochInfoReq struct {
+	// epoch_identifier is the epoch identifier to query.
+	EpochIdentifier string `protobuf:"bytes,1,opt,name=epoch_identifier,json=epochIdentifier,proto3" json:"epoch_identifier,omitempty"`
+	// epoch_number is the epoch number to query.
+	EpochNumber int64 `protobuf:"varint,2,opt,name=epoch_number,json=epochNumber,proto3" json:"epoch_number,omitempty"`
 }
 
-func (m *UndelegationsByHeightReq) Reset()         { *m = UndelegationsByHeightReq{} }
-func (m *UndelegationsByHeightReq) String() string { return proto.CompactTextString(m) }
-func (*UndelegationsByHeightReq) ProtoMessage()    {}
-func (*UndelegationsByHeightReq) Descriptor() ([]byte, []int) {
+func (m *UndelegationsByEpochInfoReq) Reset()         { *m = UndelegationsByEpochInfoReq{} }
+func (m *UndelegationsByEpochInfoReq) String() string { return proto.CompactTextString(m) }
+func (*UndelegationsByEpochInfoReq) ProtoMessage()    {}
+func (*UndelegationsByEpochInfoReq) Descriptor() ([]byte, []int) {
 	return fileDescriptor_aab345e1cf20490c, []int{8}
 }
-func (m *UndelegationsByHeightReq) XXX_Unmarshal(b []byte) error {
+func (m *UndelegationsByEpochInfoReq) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *UndelegationsByHeightReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *UndelegationsByEpochInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_UndelegationsByHeightReq.Marshal(b, m, deterministic)
+		return xxx_messageInfo_UndelegationsByEpochInfoReq.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -472,21 +474,28 @@ func (m *UndelegationsByHeightReq) XXX_Marshal(b []byte, deterministic bool) ([]
 		return b[:n], nil
 	}
 }
-func (m *UndelegationsByHeightReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UndelegationsByHeightReq.Merge(m, src)
+func (m *UndelegationsByEpochInfoReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UndelegationsByEpochInfoReq.Merge(m, src)
 }
-func (m *UndelegationsByHeightReq) XXX_Size() int {
+func (m *UndelegationsByEpochInfoReq) XXX_Size() int {
 	return m.Size()
 }
-func (m *UndelegationsByHeightReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_UndelegationsByHeightReq.DiscardUnknown(m)
+func (m *UndelegationsByEpochInfoReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_UndelegationsByEpochInfoReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_UndelegationsByHeightReq proto.InternalMessageInfo
+var xxx_messageInfo_UndelegationsByEpochInfoReq proto.InternalMessageInfo
 
-func (m *UndelegationsByHeightReq) GetBlockHeight() uint64 {
+func (m *UndelegationsByEpochInfoReq) GetEpochIdentifier() string {
 	if m != nil {
-		return m.BlockHeight
+		return m.EpochIdentifier
+	}
+	return ""
+}
+
+func (m *UndelegationsByEpochInfoReq) GetEpochNumber() int64 {
+	if m != nil {
+		return m.EpochNumber
 	}
 	return 0
 }
@@ -540,7 +549,7 @@ func (m *UndelegationRecordList) GetUndelegations() []*UndelegationRecord {
 // QueryAssociatedOperatorByStakerReq is the request to obtain the associated operator of the specified staker
 type QueryAssociatedOperatorByStakerReq struct {
 	// stake_id is the staker id for which the query is made.
-	StakerId string `protobuf:"bytes,1,opt,name=staker_id,json=stakerId,proto3" json:"staker_id,omitempty"`
+	StakerID string `protobuf:"bytes,1,opt,name=staker_id,json=stakerId,proto3" json:"staker_id,omitempty"`
 }
 
 func (m *QueryAssociatedOperatorByStakerReq) Reset()         { *m = QueryAssociatedOperatorByStakerReq{} }
@@ -576,9 +585,9 @@ func (m *QueryAssociatedOperatorByStakerReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryAssociatedOperatorByStakerReq proto.InternalMessageInfo
 
-func (m *QueryAssociatedOperatorByStakerReq) GetStakerId() string {
+func (m *QueryAssociatedOperatorByStakerReq) GetStakerID() string {
 	if m != nil {
-		return m.StakerId
+		return m.StakerID
 	}
 	return ""
 }
@@ -725,118 +734,6 @@ func (m *QueryAssociatedStakersByOperatorResponse) GetStakers() []string {
 	return nil
 }
 
-// QueryDelegatedStakersByOperatorReq is the request to obtain the delegated stakers of the specified operator
-type QueryDelegatedStakersByOperatorReq struct {
-	// operator is the operator address for which the query is made.
-	Operator string `protobuf:"bytes,1,opt,name=operator,proto3" json:"operator,omitempty"`
-	// asset_id is the asset id.
-	AssetId string `protobuf:"bytes,2,opt,name=asset_id,json=assetId,proto3" json:"asset_id,omitempty"`
-}
-
-func (m *QueryDelegatedStakersByOperatorReq) Reset()         { *m = QueryDelegatedStakersByOperatorReq{} }
-func (m *QueryDelegatedStakersByOperatorReq) String() string { return proto.CompactTextString(m) }
-func (*QueryDelegatedStakersByOperatorReq) ProtoMessage()    {}
-func (*QueryDelegatedStakersByOperatorReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_aab345e1cf20490c, []int{14}
-}
-func (m *QueryDelegatedStakersByOperatorReq) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryDelegatedStakersByOperatorReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryDelegatedStakersByOperatorReq.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryDelegatedStakersByOperatorReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryDelegatedStakersByOperatorReq.Merge(m, src)
-}
-func (m *QueryDelegatedStakersByOperatorReq) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryDelegatedStakersByOperatorReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryDelegatedStakersByOperatorReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryDelegatedStakersByOperatorReq proto.InternalMessageInfo
-
-func (m *QueryDelegatedStakersByOperatorReq) GetOperator() string {
-	if m != nil {
-		return m.Operator
-	}
-	return ""
-}
-
-func (m *QueryDelegatedStakersByOperatorReq) GetAssetId() string {
-	if m != nil {
-		return m.AssetId
-	}
-	return ""
-}
-
-// QueryDelegatedStakersByOperatorResponse is the response to QueryDelegatedStakersByOperatorReq
-type QueryDelegatedStakersByOperatorResponse struct {
-	// count is the number of stakers
-	Count uint64 `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	// stakers is the returned stakers associated to the specified operator
-	Stakers []string `protobuf:"bytes,2,rep,name=stakers,proto3" json:"stakers,omitempty"`
-}
-
-func (m *QueryDelegatedStakersByOperatorResponse) Reset() {
-	*m = QueryDelegatedStakersByOperatorResponse{}
-}
-func (m *QueryDelegatedStakersByOperatorResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryDelegatedStakersByOperatorResponse) ProtoMessage()    {}
-func (*QueryDelegatedStakersByOperatorResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_aab345e1cf20490c, []int{15}
-}
-func (m *QueryDelegatedStakersByOperatorResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryDelegatedStakersByOperatorResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryDelegatedStakersByOperatorResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryDelegatedStakersByOperatorResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryDelegatedStakersByOperatorResponse.Merge(m, src)
-}
-func (m *QueryDelegatedStakersByOperatorResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryDelegatedStakersByOperatorResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryDelegatedStakersByOperatorResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryDelegatedStakersByOperatorResponse proto.InternalMessageInfo
-
-func (m *QueryDelegatedStakersByOperatorResponse) GetCount() uint64 {
-	if m != nil {
-		return m.Count
-	}
-	return 0
-}
-
-func (m *QueryDelegatedStakersByOperatorResponse) GetStakers() []string {
-	if m != nil {
-		return m.Stakers
-	}
-	return nil
-}
-
 func init() {
 	proto.RegisterType((*DelegationInfoReq)(nil), "exocore.delegation.v1.DelegationInfoReq")
 	proto.RegisterType((*StakerList)(nil), "exocore.delegation.v1.StakerList")
@@ -847,87 +744,82 @@ func init() {
 	proto.RegisterType((*UndelegationHoldCountReq)(nil), "exocore.delegation.v1.UndelegationHoldCountReq")
 	proto.RegisterType((*UndelegationHoldCountResponse)(nil), "exocore.delegation.v1.UndelegationHoldCountResponse")
 	proto.RegisterType((*UndelegationsReq)(nil), "exocore.delegation.v1.UndelegationsReq")
-	proto.RegisterType((*UndelegationsByHeightReq)(nil), "exocore.delegation.v1.UndelegationsByHeightReq")
+	proto.RegisterType((*UndelegationsByEpochInfoReq)(nil), "exocore.delegation.v1.UndelegationsByEpochInfoReq")
 	proto.RegisterType((*UndelegationRecordList)(nil), "exocore.delegation.v1.UndelegationRecordList")
 	proto.RegisterType((*QueryAssociatedOperatorByStakerReq)(nil), "exocore.delegation.v1.QueryAssociatedOperatorByStakerReq")
 	proto.RegisterType((*QueryAssociatedOperatorByStakerResponse)(nil), "exocore.delegation.v1.QueryAssociatedOperatorByStakerResponse")
 	proto.RegisterType((*QueryAssociatedStakersByOperatorReq)(nil), "exocore.delegation.v1.QueryAssociatedStakersByOperatorReq")
 	proto.RegisterType((*QueryAssociatedStakersByOperatorResponse)(nil), "exocore.delegation.v1.QueryAssociatedStakersByOperatorResponse")
-	proto.RegisterType((*QueryDelegatedStakersByOperatorReq)(nil), "exocore.delegation.v1.QueryDelegatedStakersByOperatorReq")
-	proto.RegisterType((*QueryDelegatedStakersByOperatorResponse)(nil), "exocore.delegation.v1.QueryDelegatedStakersByOperatorResponse")
 }
 
 func init() { proto.RegisterFile("exocore/delegation/v1/query.proto", fileDescriptor_aab345e1cf20490c) }
 
 var fileDescriptor_aab345e1cf20490c = []byte{
-	// 1062 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x57, 0x4d, 0x6f, 0xdc, 0x44,
-	0x18, 0x8e, 0x13, 0x42, 0x93, 0x37, 0x8d, 0x08, 0xd3, 0x50, 0x36, 0x0e, 0xd9, 0xa4, 0x46, 0x6a,
-	0x03, 0x52, 0xd6, 0x6a, 0x88, 0xaa, 0xa6, 0x25, 0x81, 0x4d, 0x13, 0xc8, 0x12, 0xd4, 0xa8, 0x8e,
-	0x38, 0xf0, 0x21, 0x59, 0xce, 0x7a, 0xea, 0xb5, 0x76, 0xe3, 0xd9, 0x7a, 0x66, 0xd3, 0xac, 0xa2,
-	0xbd, 0x70, 0xe2, 0x58, 0x89, 0x7f, 0xc0, 0x2f, 0xe0, 0x50, 0x71, 0xe1, 0x8e, 0x7a, 0x41, 0xaa,
-	0xda, 0x0b, 0xe2, 0x50, 0x41, 0x82, 0x84, 0xf8, 0x0b, 0x5c, 0x40, 0x1e, 0x8f, 0xd7, 0xe3, 0xc4,
-	0xf6, 0xee, 0x16, 0x71, 0xca, 0xce, 0xc7, 0xfb, 0xbe, 0xcf, 0xf3, 0x7e, 0x3c, 0xe3, 0xc0, 0x15,
-	0x7c, 0x44, 0xaa, 0xc4, 0xc7, 0xba, 0x8d, 0x1b, 0xd8, 0xb1, 0x98, 0x4b, 0x3c, 0xfd, 0xf0, 0xba,
-	0xfe, 0xa0, 0x85, 0xfd, 0x76, 0xa9, 0xe9, 0x13, 0x46, 0xd0, 0x1b, 0xe2, 0x4a, 0x29, 0xbe, 0x52,
-	0x3a, 0xbc, 0xae, 0xce, 0x56, 0x09, 0x3d, 0x20, 0x34, 0xbc, 0x7a, 0xc6, 0x46, 0x9d, 0x09, 0x0f,
-	0x4d, 0xbe, 0xd2, 0xc3, 0x85, 0x38, 0x2a, 0xa6, 0x47, 0x64, 0x47, 0xe2, 0x7c, 0xda, 0x21, 0x0e,
-	0x09, 0xed, 0x82, 0x5f, 0x62, 0xf7, 0x2d, 0x87, 0x10, 0xa7, 0x81, 0x75, 0xab, 0xe9, 0xea, 0x96,
-	0xe7, 0x11, 0xc6, 0x0d, 0x85, 0x4f, 0x6d, 0x07, 0x5e, 0xdf, 0xec, 0x7a, 0xab, 0x78, 0xf7, 0x89,
-	0x81, 0x1f, 0xa0, 0x59, 0x18, 0xa7, 0xcc, 0xaa, 0x63, 0xdf, 0x74, 0xed, 0x82, 0xb2, 0xa0, 0x2c,
-	0x8e, 0x1b, 0x63, 0xe1, 0x46, 0xc5, 0x46, 0x33, 0x30, 0x66, 0x51, 0x8a, 0x59, 0x70, 0x36, 0xcc,
-	0xcf, 0x2e, 0xf0, 0x75, 0xc5, 0xd6, 0xae, 0x02, 0xec, 0xf1, 0x6b, 0x9f, 0xba, 0x94, 0xa1, 0x02,
-	0x5c, 0x08, 0x8d, 0x68, 0x41, 0x59, 0x18, 0x09, 0xee, 0x89, 0xa5, 0xf6, 0xb7, 0x22, 0x47, 0x2d,
-	0x1f, 0x90, 0x96, 0xc7, 0x28, 0x3a, 0x80, 0x4b, 0x2d, 0x4f, 0x50, 0xb3, 0xf6, 0x1b, 0xd8, 0xa4,
-	0x35, 0xcb, 0xc7, 0x61, 0xfc, 0x8d, 0xf7, 0x9f, 0xbc, 0x98, 0x1f, 0xfa, 0xf5, 0xc5, 0xfc, 0x55,
-	0xc7, 0x65, 0xb5, 0xd6, 0x7e, 0xa9, 0x4a, 0x0e, 0x44, 0x72, 0xc4, 0x9f, 0x25, 0x6a, 0xd7, 0x75,
-	0xd6, 0x6e, 0x62, 0x5a, 0xda, 0xc4, 0xd5, 0x67, 0x8f, 0x97, 0x40, 0xe4, 0x6e, 0x13, 0x57, 0x0d,
-	0x94, 0x70, 0xbc, 0x17, 0xf8, 0x45, 0x87, 0x50, 0x78, 0x68, 0xb9, 0xcc, 0xec, 0x1e, 0xb9, 0xc4,
-	0x33, 0x2d, 0x8e, 0x25, 0xe4, 0x35, 0x50, 0xcc, 0x8a, 0xc7, 0xa4, 0x98, 0x15, 0x8f, 0x19, 0x97,
-	0x03, 0xef, 0x9f, 0x49, 0xce, 0x43, 0x9e, 0xda, 0x3f, 0x0a, 0xcc, 0xde, 0x0b, 0x0a, 0x7e, 0x36,
-	0xef, 0xb4, 0x49, 0x3c, 0x8a, 0x91, 0x0f, 0x53, 0x12, 0x20, 0xd7, 0xbb, 0x4f, 0xc2, 0xfc, 0x4d,
-	0x2c, 0x7f, 0x5c, 0x4a, 0xed, 0xa7, 0x52, 0x8e, 0xb7, 0x52, 0x72, 0x9b, 0x6e, 0x79, 0xcc, 0x6f,
-	0x1b, 0xaf, 0xd9, 0xc9, 0x5d, 0xb5, 0x01, 0xd3, 0x69, 0x17, 0xd1, 0x14, 0x8c, 0xd4, 0x71, 0x5b,
-	0xb4, 0x40, 0xf0, 0x13, 0xad, 0xc3, 0xe8, 0xa1, 0xd5, 0x68, 0x61, 0x9e, 0xa2, 0x89, 0xe5, 0xc5,
-	0x0c, 0x48, 0xe7, 0xaa, 0x6b, 0x84, 0x66, 0xb7, 0x86, 0x6f, 0x2a, 0xda, 0x23, 0x05, 0xde, 0xdc,
-	0x73, 0x3d, 0xa7, 0x81, 0x07, 0x6c, 0xbd, 0x35, 0x98, 0x24, 0x4d, 0xec, 0x5b, 0x8c, 0xf8, 0xa6,
-	0x65, 0xdb, 0xbe, 0xa8, 0x53, 0xe1, 0xd9, 0xe3, 0xa5, 0x69, 0x91, 0xf9, 0xb2, 0x6d, 0xfb, 0x98,
-	0xd2, 0x3d, 0xe6, 0xbb, 0x9e, 0x63, 0x5c, 0x8c, 0xae, 0x07, 0xdb, 0x89, 0xce, 0x1d, 0x49, 0x76,
-	0xee, 0x2a, 0x14, 0xe4, 0x52, 0x6d, 0x93, 0x86, 0x7d, 0x27, 0xc0, 0x1d, 0x40, 0x9a, 0x03, 0xf0,
-	0x71, 0x95, 0xf8, 0xb6, 0x19, 0xe7, 0x62, 0x3c, 0xdc, 0xd9, 0xc1, 0x6d, 0x6d, 0x1d, 0xe6, 0x32,
-	0x4c, 0x45, 0x41, 0xe7, 0x00, 0x6a, 0xa4, 0x61, 0x9b, 0x55, 0xde, 0x5a, 0x81, 0xfd, 0x2b, 0xc6,
-	0x78, 0x2d, 0xba, 0xa6, 0x7d, 0x02, 0x53, 0xb2, 0x3d, 0xfd, 0x2f, 0x03, 0xb8, 0x96, 0xa4, 0x41,
-	0x37, 0xda, 0xdb, 0xd8, 0x75, 0x6a, 0x9c, 0xc6, 0x15, 0xb8, 0xb8, 0xdf, 0x20, 0xd5, 0xba, 0x59,
-	0xe3, 0x5b, 0x02, 0xc8, 0x04, 0xdf, 0x0b, 0x6f, 0x69, 0x2e, 0x5c, 0x96, 0xcd, 0x0d, 0xce, 0x91,
-	0xcf, 0xf2, 0x2e, 0x4c, 0xca, 0x73, 0x12, 0x75, 0xe4, 0x3b, 0x19, 0xe5, 0x3f, 0xef, 0xc5, 0x48,
-	0xda, 0x6b, 0x65, 0xd0, 0x78, 0xdb, 0x96, 0x29, 0x25, 0x55, 0xd7, 0x62, 0xd8, 0xde, 0x15, 0xa5,
-	0xda, 0x68, 0x87, 0x1a, 0xd2, 0x2b, 0x0f, 0xda, 0x16, 0x5c, 0xeb, 0xe9, 0x42, 0x94, 0x40, 0x85,
-	0xb1, 0xa8, 0x13, 0x22, 0x37, 0xd1, 0x5a, 0x2b, 0xc3, 0xdb, 0x67, 0xdc, 0x84, 0xc6, 0x74, 0xa3,
-	0x1d, 0xf9, 0x0b, 0xa0, 0xe4, 0xb9, 0xd8, 0x84, 0xc5, 0xde, 0x2e, 0x04, 0x94, 0x6c, 0x55, 0xfc,
-	0x52, 0xa4, 0x44, 0x0c, 0xc5, 0xe0, 0x38, 0xf2, 0x3a, 0xe3, 0x73, 0x91, 0xac, 0x3c, 0xe7, 0x02,
-	0xe1, 0x34, 0x8c, 0xca, 0xad, 0x1a, 0x2e, 0x64, 0xdc, 0xc3, 0x09, 0xdc, 0xcb, 0xdf, 0x4d, 0xc2,
-	0x28, 0xf7, 0x8d, 0x7e, 0x54, 0xe0, 0x52, 0x8a, 0x18, 0xa1, 0xde, 0x2a, 0x21, 0xc6, 0x5f, 0x5d,
-	0x1e, 0x5c, 0xe2, 0xb4, 0x8f, 0xbe, 0xf9, 0xf3, 0xfb, 0x77, 0x95, 0xaf, 0x9f, 0xff, 0xf1, 0xed,
-	0xf0, 0x6d, 0xb4, 0xaa, 0xa7, 0x3f, 0x92, 0x52, 0xef, 0xe9, 0xc7, 0xdd, 0x9e, 0xea, 0xe8, 0xc7,
-	0x51, 0xc2, 0x3a, 0xe8, 0xb9, 0x02, 0x33, 0x3c, 0x4e, 0x9a, 0x36, 0xa1, 0x52, 0x06, 0xb2, 0x0c,
-	0x21, 0x53, 0xfb, 0x56, 0x46, 0xed, 0xab, 0x18, 0xff, 0x3d, 0xb4, 0x9b, 0x81, 0x9f, 0xf2, 0x30,
-	0xa6, 0xb4, 0x99, 0x60, 0x91, 0x90, 0xc5, 0x04, 0xab, 0x9f, 0x15, 0x50, 0x39, 0xab, 0x54, 0x91,
-	0x42, 0x7a, 0x1f, 0x13, 0x2c, 0xab, 0xa1, 0xba, 0x32, 0x98, 0x81, 0xa8, 0xd1, 0x76, 0xcc, 0x71,
-	0x0d, 0xdd, 0xce, 0xe0, 0x98, 0x78, 0x89, 0x63, 0xc9, 0xd4, 0x8f, 0x63, 0xf9, 0xed, 0xa0, 0x1f,
-	0x14, 0x40, 0xe7, 0xf8, 0x50, 0x74, 0xad, 0x0f, 0x58, 0x81, 0xb4, 0xaa, 0x4b, 0x7d, 0x4b, 0x56,
-	0x20, 0x7c, 0x83, 0x03, 0xcf, 0x6c, 0xaf, 0x9f, 0xd2, 0x0a, 0xd1, 0x55, 0xe8, 0xbe, 0x0a, 0x21,
-	0xeb, 0xf9, 0xff, 0x42, 0xa4, 0x89, 0x3d, 0xdb, 0xf5, 0x1c, 0xf3, 0x0c, 0x21, 0xf9, 0xdd, 0xe8,
-	0xa0, 0xdf, 0x15, 0x98, 0xef, 0x21, 0xbc, 0x68, 0x35, 0x6f, 0x8e, 0x73, 0x35, 0x5f, 0x5d, 0x7f,
-	0x59, 0x53, 0xd1, 0x6a, 0x77, 0x62, 0xa2, 0x37, 0xd1, 0x8d, 0x0c, 0xa2, 0x56, 0xd7, 0x8f, 0x19,
-	0x8d, 0x8e, 0x5c, 0x37, 0x74, 0xa2, 0xc0, 0x42, 0x2f, 0x49, 0x47, 0xb7, 0xfa, 0x43, 0x9a, 0x26,
-	0xe3, 0xea, 0x07, 0x2f, 0x6d, 0x2b, 0x68, 0x96, 0x63, 0x9a, 0x37, 0xd0, 0x4a, 0x6f, 0x9a, 0x42,
-	0xad, 0x63, 0xa9, 0xe8, 0xa0, 0xbf, 0xa2, 0x42, 0x66, 0x3f, 0x0a, 0xf9, 0x85, 0xcc, 0x7d, 0xa9,
-	0xf2, 0x0b, 0xd9, 0xfb, 0x1d, 0xd2, 0x76, 0x62, 0x86, 0x1f, 0xa2, 0xf5, 0x7c, 0x5d, 0x4f, 0x25,
-	0x28, 0x4d, 0xdf, 0xc6, 0xdd, 0x27, 0x27, 0x45, 0xe5, 0xe9, 0x49, 0x51, 0xf9, 0xed, 0xa4, 0xa8,
-	0x3c, 0x3a, 0x2d, 0x0e, 0x3d, 0x3d, 0x2d, 0x0e, 0xfd, 0x72, 0x5a, 0x1c, 0xfa, 0x62, 0x45, 0xfa,
-	0xba, 0xdf, 0x0a, 0x63, 0xdc, 0xc5, 0xec, 0x21, 0xf1, 0xeb, 0xdd, 0x90, 0x47, 0x72, 0x50, 0xfe,
-	0xbd, 0xbf, 0xff, 0x2a, 0xff, 0xf7, 0xe9, 0xbd, 0x7f, 0x03, 0x00, 0x00, 0xff, 0xff, 0x2d, 0xe5,
-	0x5e, 0x42, 0x06, 0x0e, 0x00, 0x00,
+	// 1020 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xcf, 0x6f, 0x1b, 0x45,
+	0x14, 0xce, 0x34, 0x94, 0xc4, 0xcf, 0xa9, 0x1a, 0xa6, 0xa1, 0xb8, 0x1b, 0x62, 0xa7, 0x8b, 0x94,
+	0x3a, 0x45, 0xf1, 0x52, 0x13, 0xa2, 0xb6, 0xa2, 0x01, 0xbb, 0x8e, 0x8a, 0x55, 0x94, 0x88, 0x8d,
+	0xb8, 0x70, 0xb1, 0x36, 0xbb, 0x13, 0x7b, 0x65, 0x7b, 0xc7, 0xdd, 0x19, 0xa7, 0xb1, 0xaa, 0x5e,
+	0x10, 0x07, 0x8e, 0x48, 0xfc, 0x0b, 0x9c, 0xe0, 0xc2, 0x21, 0xff, 0x02, 0x52, 0x8f, 0x51, 0xb9,
+	0x20, 0x0e, 0x11, 0x38, 0x48, 0x5c, 0x39, 0x73, 0x01, 0xed, 0xec, 0xd8, 0xbb, 0x8e, 0xd7, 0xf6,
+	0xba, 0x88, 0x53, 0x3c, 0x6f, 0xde, 0xfb, 0xde, 0xf7, 0x7e, 0xcc, 0x97, 0x85, 0x9b, 0xe4, 0x98,
+	0x9a, 0xd4, 0x25, 0x9a, 0x45, 0x1a, 0xa4, 0x6a, 0x70, 0x9b, 0x3a, 0xda, 0xd1, 0x1d, 0xed, 0x49,
+	0x9b, 0xb8, 0x9d, 0x5c, 0xcb, 0xa5, 0x9c, 0xe2, 0x37, 0xa5, 0x4b, 0x2e, 0x70, 0xc9, 0x1d, 0xdd,
+	0x51, 0x96, 0x4d, 0xca, 0x9a, 0x94, 0xf9, 0xae, 0x17, 0x62, 0x94, 0x1b, 0xfe, 0x65, 0x45, 0x9c,
+	0x34, 0xff, 0x20, 0xaf, 0xd2, 0xd1, 0x19, 0xf9, 0xb1, 0xbc, 0x5f, 0xaa, 0xd2, 0x2a, 0xf5, 0xe3,
+	0xbc, 0x5f, 0xd2, 0xfa, 0x76, 0x95, 0xd2, 0x6a, 0x83, 0x68, 0x46, 0xcb, 0xd6, 0x0c, 0xc7, 0xa1,
+	0x5c, 0x04, 0x4a, 0x4c, 0xf5, 0x10, 0xde, 0x28, 0xf5, 0xd1, 0xca, 0xce, 0x21, 0xd5, 0xc9, 0x13,
+	0xbc, 0x0e, 0x09, 0xc6, 0x8d, 0x3a, 0x71, 0x2b, 0xb6, 0x95, 0x42, 0xab, 0x28, 0x9b, 0x28, 0x2e,
+	0x74, 0xcf, 0x32, 0xf3, 0xfb, 0xc2, 0x58, 0x2e, 0xe9, 0xf3, 0xfe, 0x75, 0xd9, 0xc2, 0x6b, 0x30,
+	0x6f, 0x30, 0x46, 0xb8, 0xe7, 0x79, 0x49, 0x78, 0x26, 0xbb, 0x67, 0x99, 0xb9, 0x82, 0x67, 0x2b,
+	0x97, 0xf4, 0x39, 0x71, 0x59, 0xb6, 0xd4, 0x35, 0x00, 0x3f, 0xfa, 0x53, 0x9b, 0x71, 0x9c, 0x82,
+	0x39, 0x1f, 0x81, 0xa5, 0xd0, 0xea, 0x6c, 0x36, 0xa1, 0xf7, 0x8e, 0xea, 0xdf, 0x28, 0x4c, 0xa8,
+	0xd0, 0xa4, 0x6d, 0x87, 0x33, 0xdc, 0x84, 0x6b, 0x6d, 0x47, 0x56, 0x6d, 0x1c, 0x34, 0x48, 0x85,
+	0xd5, 0x0c, 0x97, 0x48, 0x6a, 0x1f, 0xbe, 0x38, 0xcb, 0xcc, 0xfc, 0x7a, 0x96, 0x59, 0xab, 0xda,
+	0xbc, 0xd6, 0x3e, 0xc8, 0x99, 0xb4, 0x29, 0xfb, 0x26, 0xff, 0x6c, 0x30, 0xab, 0xae, 0xf1, 0x4e,
+	0x8b, 0xb0, 0x5c, 0x89, 0x98, 0x2f, 0x4f, 0x36, 0x40, 0xb6, 0xb5, 0x44, 0x4c, 0x1d, 0x0f, 0x00,
+	0xef, 0x7b, 0xb8, 0xf8, 0x08, 0x52, 0x4f, 0x0d, 0x9b, 0x57, 0xfa, 0x57, 0x36, 0x75, 0x2a, 0x86,
+	0xe0, 0x22, 0x8b, 0x9c, 0x26, 0x67, 0xd9, 0xe1, 0xa1, 0x9c, 0x65, 0x87, 0xeb, 0xd7, 0x3d, 0xf4,
+	0xcf, 0x43, 0xe0, 0x7e, 0x9d, 0xea, 0x3f, 0x08, 0x96, 0x3f, 0xf3, 0x76, 0xe1, 0xe2, 0x48, 0x58,
+	0x8b, 0x3a, 0x8c, 0x60, 0x17, 0x16, 0x43, 0x84, 0x6c, 0xe7, 0x90, 0xfa, 0xfd, 0x4b, 0xe6, 0x1f,
+	0xe5, 0x22, 0x57, 0x2d, 0x37, 0x06, 0x2d, 0x37, 0x68, 0x66, 0x3b, 0x0e, 0x77, 0x3b, 0xfa, 0x55,
+	0x6b, 0xd0, 0xaa, 0x34, 0x60, 0x29, 0xca, 0x11, 0x2f, 0xc2, 0x6c, 0x9d, 0x74, 0xfc, 0x11, 0xe8,
+	0xde, 0x4f, 0xbc, 0x0d, 0x97, 0x8f, 0x8c, 0x46, 0x9b, 0x88, 0x16, 0x25, 0xf3, 0xd9, 0x11, 0x94,
+	0x86, 0xa6, 0xab, 0xfb, 0x61, 0xf7, 0x2f, 0xdd, 0x45, 0xea, 0x0f, 0x08, 0xde, 0xda, 0xb7, 0x9d,
+	0x6a, 0x83, 0xfc, 0xa7, 0xad, 0x7c, 0x00, 0x57, 0x68, 0x8b, 0xb8, 0x06, 0xa7, 0x6e, 0xc5, 0xb0,
+	0x2c, 0x57, 0x4e, 0x2d, 0xf5, 0xf2, 0x64, 0x63, 0x49, 0xce, 0xa1, 0x60, 0x59, 0x2e, 0x61, 0x6c,
+	0x9f, 0xbb, 0xb6, 0x53, 0xd5, 0x17, 0x7a, 0xee, 0x9e, 0x79, 0x60, 0xa9, 0x67, 0xc7, 0x2c, 0xf5,
+	0x3d, 0x48, 0x85, 0xa7, 0xf8, 0x09, 0x6d, 0x58, 0x0f, 0xbd, 0x92, 0x3c, 0xb6, 0x2b, 0x00, 0x2e,
+	0x31, 0xa9, 0x6b, 0x55, 0x82, 0x36, 0x25, 0x7c, 0xcb, 0x63, 0xd2, 0x51, 0xb7, 0x61, 0x65, 0x44,
+	0xa8, 0x9c, 0xf5, 0x0a, 0x40, 0x8d, 0x36, 0xac, 0x8a, 0x29, 0xb6, 0xce, 0x8b, 0x7f, 0x4d, 0x4f,
+	0xd4, 0x7a, 0x6e, 0x2a, 0x81, 0xc5, 0x70, 0x3c, 0xfb, 0x9f, 0x9e, 0x6d, 0x1d, 0x96, 0x07, 0xd2,
+	0x14, 0x3b, 0x3b, 0x2d, 0x6a, 0xd6, 0x82, 0x91, 0x2c, 0x12, 0xef, 0x5c, 0xb1, 0x2d, 0xe2, 0x70,
+	0xfb, 0xd0, 0x26, 0xae, 0x2c, 0xf5, 0xaa, 0xb0, 0x97, 0xfb, 0x66, 0x7c, 0x13, 0x16, 0x7c, 0x57,
+	0xa7, 0xdd, 0x3c, 0x20, 0xfe, 0x44, 0x66, 0xf5, 0xa4, 0xb0, 0xed, 0x0a, 0x93, 0x6a, 0xc3, 0xf5,
+	0x70, 0x32, 0x5d, 0x34, 0x4b, 0xe8, 0xc5, 0x1e, 0x5c, 0x09, 0xbf, 0xc5, 0xde, 0xd6, 0xaf, 0x8f,
+	0x58, 0xb1, 0x61, 0x14, 0x7d, 0x30, 0x5e, 0xdd, 0x03, 0x55, 0x3c, 0x8d, 0x02, 0x63, 0xd4, 0xb4,
+	0x0d, 0x4e, 0xac, 0x3d, 0xb9, 0x00, 0xc5, 0x8e, 0xdf, 0xae, 0xe9, 0x1a, 0xaa, 0xee, 0xc0, 0xad,
+	0x89, 0x80, 0x72, 0xb2, 0x0a, 0xcc, 0xf7, 0xb6, 0x4d, 0x36, 0xab, 0x7f, 0x56, 0x0b, 0xf0, 0xce,
+	0x05, 0x18, 0x3f, 0x98, 0x15, 0x3b, 0x3d, 0x3c, 0x8f, 0xd8, 0x38, 0x88, 0x12, 0x64, 0x27, 0x43,
+	0x48, 0x2a, 0x23, 0x75, 0x38, 0xff, 0x55, 0x12, 0x2e, 0x0b, 0x18, 0xfc, 0x3d, 0x82, 0x6b, 0x11,
+	0x32, 0x82, 0x27, 0xbf, 0x6f, 0xb9, 0x25, 0x4a, 0x7e, 0x7a, 0x71, 0x52, 0x3f, 0xf8, 0xfa, 0xcf,
+	0x1f, 0x6f, 0xa3, 0x2f, 0x7f, 0xfe, 0xe3, 0xdb, 0x4b, 0xb7, 0x71, 0x56, 0x8b, 0xfe, 0xcf, 0xf7,
+	0x88, 0xf0, 0x0b, 0xa4, 0x4e, 0x10, 0xdc, 0x10, 0xb0, 0x51, 0x22, 0x82, 0x73, 0x23, 0x88, 0x8c,
+	0x50, 0x1c, 0x25, 0xb6, 0x84, 0xa9, 0x0f, 0x02, 0xba, 0x79, 0xfc, 0xde, 0x08, 0xba, 0xa3, 0x89,
+	0x9d, 0x22, 0x50, 0xc4, 0x6d, 0xa4, 0x26, 0x60, 0x2d, 0xc6, 0x9e, 0x87, 0xc5, 0x47, 0xd9, 0x9c,
+	0x2e, 0x40, 0xf6, 0xfc, 0x71, 0x50, 0xc4, 0xc7, 0x78, 0x7b, 0x5c, 0x11, 0x91, 0x38, 0xda, 0xb3,
+	0x40, 0xf0, 0x9e, 0xe3, 0xef, 0x10, 0xe0, 0x21, 0x5f, 0x86, 0x6f, 0xc5, 0x60, 0xe6, 0x89, 0x99,
+	0xb2, 0x11, 0xfb, 0x6d, 0x7b, 0x0a, 0xa1, 0x6e, 0x05, 0xdc, 0xdf, 0xc5, 0xeb, 0x71, 0xb9, 0x33,
+	0xfc, 0x13, 0x82, 0x95, 0x61, 0x73, 0x48, 0xe6, 0x70, 0x3e, 0x0e, 0xe3, 0x41, 0x5d, 0x9c, 0x96,
+	0x7c, 0x21, 0x20, 0xbf, 0x85, 0x37, 0x63, 0x93, 0x0f, 0xb3, 0xfc, 0x1d, 0x41, 0x66, 0x82, 0x00,
+	0xe1, 0x7b, 0xe3, 0xde, 0xe1, 0x58, 0x25, 0x54, 0xb6, 0x5f, 0x35, 0x54, 0xae, 0xd6, 0xc3, 0xa0,
+	0xc2, 0xbb, 0x78, 0x6b, 0x5c, 0x85, 0x63, 0xf8, 0xff, 0x85, 0x60, 0x75, 0x92, 0xb4, 0xe1, 0xfb,
+	0xf1, 0x98, 0x46, 0xc9, 0xaa, 0xf2, 0xd1, 0x2b, 0xc7, 0xca, 0x32, 0xf7, 0x82, 0x32, 0x4b, 0xb8,
+	0x18, 0xaf, 0xcc, 0x21, 0x34, 0xed, 0x59, 0x4f, 0xcb, 0x9f, 0x17, 0x77, 0x5f, 0x74, 0xd3, 0xe8,
+	0xb4, 0x9b, 0x46, 0xbf, 0x75, 0xd3, 0xe8, 0x9b, 0xf3, 0xf4, 0xcc, 0xe9, 0x79, 0x7a, 0xe6, 0x97,
+	0xf3, 0xf4, 0xcc, 0x17, 0x9b, 0xa1, 0x2f, 0xcf, 0x1d, 0x3f, 0xcf, 0x2e, 0xe1, 0x4f, 0xa9, 0x5b,
+	0xef, 0xa7, 0x3d, 0x0e, 0x27, 0x16, 0xdf, 0xa2, 0x07, 0xaf, 0x8b, 0xaf, 0xfe, 0xf7, 0xff, 0x0d,
+	0x00, 0x00, 0xff, 0xff, 0x0f, 0x58, 0x2e, 0x69, 0xbd, 0x0c, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -952,15 +844,13 @@ type QueryClient interface {
 	// QueryUndelegations queries all undelegations for
 	// {staker, asset}.
 	QueryUndelegations(ctx context.Context, in *UndelegationsReq, opts ...grpc.CallOption) (*UndelegationRecordList, error)
-	// QueryUndelegationsByHeight queries all undelegations waiting to be completed by
-	// {height}.
-	QueryUndelegationsByHeight(ctx context.Context, in *UndelegationsByHeightReq, opts ...grpc.CallOption) (*UndelegationRecordList, error)
+	// QueryUndelegationsByEpochInfo queries all undelegations waiting to be completed by
+	// {epoch_identifier,epoch_number}.
+	QueryUndelegationsByEpochInfo(ctx context.Context, in *UndelegationsByEpochInfoReq, opts ...grpc.CallOption) (*UndelegationRecordList, error)
 	// QueryAssociatedOperatorByStaker queries the associated operator for the specified staker
 	QueryAssociatedOperatorByStaker(ctx context.Context, in *QueryAssociatedOperatorByStakerReq, opts ...grpc.CallOption) (*QueryAssociatedOperatorByStakerResponse, error)
 	// QueryAssociatedStakersByOperator queries the associated stakers for the specified operator
 	QueryAssociatedStakersByOperator(ctx context.Context, in *QueryAssociatedStakersByOperatorReq, opts ...grpc.CallOption) (*QueryAssociatedStakersByOperatorResponse, error)
-	// QueryDelegatedStakersByOperator queries the delegated stakers for the specified operator
-	QueryDelegatedStakersByOperator(ctx context.Context, in *QueryDelegatedStakersByOperatorReq, opts ...grpc.CallOption) (*QueryDelegatedStakersByOperatorResponse, error)
 }
 
 type queryClient struct {
@@ -1007,9 +897,9 @@ func (c *queryClient) QueryUndelegations(ctx context.Context, in *UndelegationsR
 	return out, nil
 }
 
-func (c *queryClient) QueryUndelegationsByHeight(ctx context.Context, in *UndelegationsByHeightReq, opts ...grpc.CallOption) (*UndelegationRecordList, error) {
+func (c *queryClient) QueryUndelegationsByEpochInfo(ctx context.Context, in *UndelegationsByEpochInfoReq, opts ...grpc.CallOption) (*UndelegationRecordList, error) {
 	out := new(UndelegationRecordList)
-	err := c.cc.Invoke(ctx, "/exocore.delegation.v1.Query/QueryUndelegationsByHeight", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/exocore.delegation.v1.Query/QueryUndelegationsByEpochInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1034,15 +924,6 @@ func (c *queryClient) QueryAssociatedStakersByOperator(ctx context.Context, in *
 	return out, nil
 }
 
-func (c *queryClient) QueryDelegatedStakersByOperator(ctx context.Context, in *QueryDelegatedStakersByOperatorReq, opts ...grpc.CallOption) (*QueryDelegatedStakersByOperatorResponse, error) {
-	out := new(QueryDelegatedStakersByOperatorResponse)
-	err := c.cc.Invoke(ctx, "/exocore.delegation.v1.Query/QueryDelegatedStakersByOperator", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// DelegationInfo queries the delegation information for {stakerID, assetID}.
@@ -1055,15 +936,13 @@ type QueryServer interface {
 	// QueryUndelegations queries all undelegations for
 	// {staker, asset}.
 	QueryUndelegations(context.Context, *UndelegationsReq) (*UndelegationRecordList, error)
-	// QueryUndelegationsByHeight queries all undelegations waiting to be completed by
-	// {height}.
-	QueryUndelegationsByHeight(context.Context, *UndelegationsByHeightReq) (*UndelegationRecordList, error)
+	// QueryUndelegationsByEpochInfo queries all undelegations waiting to be completed by
+	// {epoch_identifier,epoch_number}.
+	QueryUndelegationsByEpochInfo(context.Context, *UndelegationsByEpochInfoReq) (*UndelegationRecordList, error)
 	// QueryAssociatedOperatorByStaker queries the associated operator for the specified staker
 	QueryAssociatedOperatorByStaker(context.Context, *QueryAssociatedOperatorByStakerReq) (*QueryAssociatedOperatorByStakerResponse, error)
 	// QueryAssociatedStakersByOperator queries the associated stakers for the specified operator
 	QueryAssociatedStakersByOperator(context.Context, *QueryAssociatedStakersByOperatorReq) (*QueryAssociatedStakersByOperatorResponse, error)
-	// QueryDelegatedStakersByOperator queries the delegated stakers for the specified operator
-	QueryDelegatedStakersByOperator(context.Context, *QueryDelegatedStakersByOperatorReq) (*QueryDelegatedStakersByOperatorResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -1082,17 +961,14 @@ func (*UnimplementedQueryServer) QueryUndelegationHoldCount(ctx context.Context,
 func (*UnimplementedQueryServer) QueryUndelegations(ctx context.Context, req *UndelegationsReq) (*UndelegationRecordList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method QueryUndelegations not implemented")
 }
-func (*UnimplementedQueryServer) QueryUndelegationsByHeight(ctx context.Context, req *UndelegationsByHeightReq) (*UndelegationRecordList, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method QueryUndelegationsByHeight not implemented")
+func (*UnimplementedQueryServer) QueryUndelegationsByEpochInfo(ctx context.Context, req *UndelegationsByEpochInfoReq) (*UndelegationRecordList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryUndelegationsByEpochInfo not implemented")
 }
 func (*UnimplementedQueryServer) QueryAssociatedOperatorByStaker(ctx context.Context, req *QueryAssociatedOperatorByStakerReq) (*QueryAssociatedOperatorByStakerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method QueryAssociatedOperatorByStaker not implemented")
 }
 func (*UnimplementedQueryServer) QueryAssociatedStakersByOperator(ctx context.Context, req *QueryAssociatedStakersByOperatorReq) (*QueryAssociatedStakersByOperatorResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method QueryAssociatedStakersByOperator not implemented")
-}
-func (*UnimplementedQueryServer) QueryDelegatedStakersByOperator(ctx context.Context, req *QueryDelegatedStakersByOperatorReq) (*QueryDelegatedStakersByOperatorResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method QueryDelegatedStakersByOperator not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -1171,20 +1047,20 @@ func _Query_QueryUndelegations_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_QueryUndelegationsByHeight_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UndelegationsByHeightReq)
+func _Query_QueryUndelegationsByEpochInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UndelegationsByEpochInfoReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).QueryUndelegationsByHeight(ctx, in)
+		return srv.(QueryServer).QueryUndelegationsByEpochInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/exocore.delegation.v1.Query/QueryUndelegationsByHeight",
+		FullMethod: "/exocore.delegation.v1.Query/QueryUndelegationsByEpochInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).QueryUndelegationsByHeight(ctx, req.(*UndelegationsByHeightReq))
+		return srv.(QueryServer).QueryUndelegationsByEpochInfo(ctx, req.(*UndelegationsByEpochInfoReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1225,24 +1101,6 @@ func _Query_QueryAssociatedStakersByOperator_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_QueryDelegatedStakersByOperator_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryDelegatedStakersByOperatorReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).QueryDelegatedStakersByOperator(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/exocore.delegation.v1.Query/QueryDelegatedStakersByOperator",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).QueryDelegatedStakersByOperator(ctx, req.(*QueryDelegatedStakersByOperatorReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "exocore.delegation.v1.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -1264,8 +1122,8 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_QueryUndelegations_Handler,
 		},
 		{
-			MethodName: "QueryUndelegationsByHeight",
-			Handler:    _Query_QueryUndelegationsByHeight_Handler,
+			MethodName: "QueryUndelegationsByEpochInfo",
+			Handler:    _Query_QueryUndelegationsByEpochInfo_Handler,
 		},
 		{
 			MethodName: "QueryAssociatedOperatorByStaker",
@@ -1274,10 +1132,6 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "QueryAssociatedStakersByOperator",
 			Handler:    _Query_QueryAssociatedStakersByOperator_Handler,
-		},
-		{
-			MethodName: "QueryDelegatedStakersByOperator",
-			Handler:    _Query_QueryDelegatedStakersByOperator_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1304,17 +1158,17 @@ func (m *DelegationInfoReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.AssetId) > 0 {
-		i -= len(m.AssetId)
-		copy(dAtA[i:], m.AssetId)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.AssetId)))
+	if len(m.AssetID) > 0 {
+		i -= len(m.AssetID)
+		copy(dAtA[i:], m.AssetID)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.AssetID)))
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.StakerId) > 0 {
-		i -= len(m.StakerId)
-		copy(dAtA[i:], m.StakerId)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.StakerId)))
+	if len(m.StakerID) > 0 {
+		i -= len(m.StakerID)
+		copy(dAtA[i:], m.StakerID)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.StakerID)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1465,10 +1319,10 @@ func (m *SingleDelegationInfoReq) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	_ = i
 	var l int
 	_ = l
-	if len(m.AssetId) > 0 {
-		i -= len(m.AssetId)
-		copy(dAtA[i:], m.AssetId)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.AssetId)))
+	if len(m.AssetID) > 0 {
+		i -= len(m.AssetID)
+		copy(dAtA[i:], m.AssetID)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.AssetID)))
 		i--
 		dAtA[i] = 0x1a
 	}
@@ -1479,10 +1333,10 @@ func (m *SingleDelegationInfoReq) MarshalToSizedBuffer(dAtA []byte) (int, error)
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.StakerId) > 0 {
-		i -= len(m.StakerId)
-		copy(dAtA[i:], m.StakerId)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.StakerId)))
+	if len(m.StakerID) > 0 {
+		i -= len(m.StakerID)
+		copy(dAtA[i:], m.StakerID)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.StakerID)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1567,24 +1421,24 @@ func (m *UndelegationsReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.AssetId) > 0 {
-		i -= len(m.AssetId)
-		copy(dAtA[i:], m.AssetId)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.AssetId)))
+	if len(m.AssetID) > 0 {
+		i -= len(m.AssetID)
+		copy(dAtA[i:], m.AssetID)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.AssetID)))
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.StakerId) > 0 {
-		i -= len(m.StakerId)
-		copy(dAtA[i:], m.StakerId)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.StakerId)))
+	if len(m.StakerID) > 0 {
+		i -= len(m.StakerID)
+		copy(dAtA[i:], m.StakerID)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.StakerID)))
 		i--
 		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *UndelegationsByHeightReq) Marshal() (dAtA []byte, err error) {
+func (m *UndelegationsByEpochInfoReq) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1594,20 +1448,27 @@ func (m *UndelegationsByHeightReq) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *UndelegationsByHeightReq) MarshalTo(dAtA []byte) (int, error) {
+func (m *UndelegationsByEpochInfoReq) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *UndelegationsByHeightReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *UndelegationsByEpochInfoReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.BlockHeight != 0 {
-		i = encodeVarintQuery(dAtA, i, uint64(m.BlockHeight))
+	if m.EpochNumber != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.EpochNumber))
 		i--
-		dAtA[i] = 0x8
+		dAtA[i] = 0x10
+	}
+	if len(m.EpochIdentifier) > 0 {
+		i -= len(m.EpochIdentifier)
+		copy(dAtA[i:], m.EpochIdentifier)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.EpochIdentifier)))
+		i--
+		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -1669,10 +1530,10 @@ func (m *QueryAssociatedOperatorByStakerReq) MarshalToSizedBuffer(dAtA []byte) (
 	_ = i
 	var l int
 	_ = l
-	if len(m.StakerId) > 0 {
-		i -= len(m.StakerId)
-		copy(dAtA[i:], m.StakerId)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.StakerId)))
+	if len(m.StakerID) > 0 {
+		i -= len(m.StakerID)
+		copy(dAtA[i:], m.StakerID)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.StakerID)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1771,80 +1632,6 @@ func (m *QueryAssociatedStakersByOperatorResponse) MarshalToSizedBuffer(dAtA []b
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryDelegatedStakersByOperatorReq) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryDelegatedStakersByOperatorReq) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryDelegatedStakersByOperatorReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.AssetId) > 0 {
-		i -= len(m.AssetId)
-		copy(dAtA[i:], m.AssetId)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.AssetId)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Operator) > 0 {
-		i -= len(m.Operator)
-		copy(dAtA[i:], m.Operator)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Operator)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryDelegatedStakersByOperatorResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryDelegatedStakersByOperatorResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryDelegatedStakersByOperatorResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Stakers) > 0 {
-		for iNdEx := len(m.Stakers) - 1; iNdEx >= 0; iNdEx-- {
-			i -= len(m.Stakers[iNdEx])
-			copy(dAtA[i:], m.Stakers[iNdEx])
-			i = encodeVarintQuery(dAtA, i, uint64(len(m.Stakers[iNdEx])))
-			i--
-			dAtA[i] = 0x12
-		}
-	}
-	if m.Count != 0 {
-		i = encodeVarintQuery(dAtA, i, uint64(m.Count))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -1862,11 +1649,11 @@ func (m *DelegationInfoReq) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.StakerId)
+	l = len(m.StakerID)
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
 	}
-	l = len(m.AssetId)
+	l = len(m.AssetID)
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
 	}
@@ -1929,7 +1716,7 @@ func (m *SingleDelegationInfoReq) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.StakerId)
+	l = len(m.StakerID)
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
 	}
@@ -1937,7 +1724,7 @@ func (m *SingleDelegationInfoReq) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
 	}
-	l = len(m.AssetId)
+	l = len(m.AssetID)
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
 	}
@@ -1975,25 +1762,29 @@ func (m *UndelegationsReq) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.StakerId)
+	l = len(m.StakerID)
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
 	}
-	l = len(m.AssetId)
+	l = len(m.AssetID)
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
 	}
 	return n
 }
 
-func (m *UndelegationsByHeightReq) Size() (n int) {
+func (m *UndelegationsByEpochInfoReq) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.BlockHeight != 0 {
-		n += 1 + sovQuery(uint64(m.BlockHeight))
+	l = len(m.EpochIdentifier)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.EpochNumber != 0 {
+		n += 1 + sovQuery(uint64(m.EpochNumber))
 	}
 	return n
 }
@@ -2019,7 +1810,7 @@ func (m *QueryAssociatedOperatorByStakerReq) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.StakerId)
+	l = len(m.StakerID)
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
 	}
@@ -2067,41 +1858,6 @@ func (m *QueryAssociatedStakersByOperatorResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryDelegatedStakersByOperatorReq) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Operator)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	l = len(m.AssetId)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryDelegatedStakersByOperatorResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Count != 0 {
-		n += 1 + sovQuery(uint64(m.Count))
-	}
-	if len(m.Stakers) > 0 {
-		for _, s := range m.Stakers {
-			l = len(s)
-			n += 1 + l + sovQuery(uint64(l))
-		}
-	}
-	return n
-}
-
 func sovQuery(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -2139,7 +1895,7 @@ func (m *DelegationInfoReq) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field StakerId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StakerID", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2167,11 +1923,11 @@ func (m *DelegationInfoReq) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.StakerId = string(dAtA[iNdEx:postIndex])
+			m.StakerID = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AssetId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AssetID", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2199,7 +1955,7 @@ func (m *DelegationInfoReq) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.AssetId = string(dAtA[iNdEx:postIndex])
+			m.AssetID = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -2632,7 +2388,7 @@ func (m *SingleDelegationInfoReq) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field StakerId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StakerID", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2660,7 +2416,7 @@ func (m *SingleDelegationInfoReq) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.StakerId = string(dAtA[iNdEx:postIndex])
+			m.StakerID = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -2696,7 +2452,7 @@ func (m *SingleDelegationInfoReq) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AssetId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AssetID", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2724,7 +2480,7 @@ func (m *SingleDelegationInfoReq) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.AssetId = string(dAtA[iNdEx:postIndex])
+			m.AssetID = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -2929,7 +2685,7 @@ func (m *UndelegationsReq) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field StakerId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StakerID", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2957,11 +2713,11 @@ func (m *UndelegationsReq) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.StakerId = string(dAtA[iNdEx:postIndex])
+			m.StakerID = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AssetId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AssetID", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2989,7 +2745,7 @@ func (m *UndelegationsReq) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.AssetId = string(dAtA[iNdEx:postIndex])
+			m.AssetID = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -3012,7 +2768,7 @@ func (m *UndelegationsReq) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *UndelegationsByHeightReq) Unmarshal(dAtA []byte) error {
+func (m *UndelegationsByEpochInfoReq) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -3035,17 +2791,17 @@ func (m *UndelegationsByHeightReq) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: UndelegationsByHeightReq: wiretype end group for non-group")
+			return fmt.Errorf("proto: UndelegationsByEpochInfoReq: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UndelegationsByHeightReq: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: UndelegationsByEpochInfoReq: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field BlockHeight", wireType)
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EpochIdentifier", wireType)
 			}
-			m.BlockHeight = 0
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowQuery
@@ -3055,7 +2811,39 @@ func (m *UndelegationsByHeightReq) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.BlockHeight |= uint64(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EpochIdentifier = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EpochNumber", wireType)
+			}
+			m.EpochNumber = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.EpochNumber |= int64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3196,7 +2984,7 @@ func (m *QueryAssociatedOperatorByStakerReq) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field StakerId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field StakerID", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -3224,7 +3012,7 @@ func (m *QueryAssociatedOperatorByStakerReq) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.StakerId = string(dAtA[iNdEx:postIndex])
+			m.StakerID = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -3441,221 +3229,6 @@ func (m *QueryAssociatedStakersByOperatorResponse) Unmarshal(dAtA []byte) error 
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Stakers", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Stakers = append(m.Stakers, string(dAtA[iNdEx:postIndex]))
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryDelegatedStakersByOperatorReq) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryDelegatedStakersByOperatorReq: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryDelegatedStakersByOperatorReq: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Operator = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AssetId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.AssetId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryDelegatedStakersByOperatorResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryDelegatedStakersByOperatorResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryDelegatedStakersByOperatorResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Count", wireType)
-			}
-			m.Count = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Count |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Stakers", wireType)
 			}

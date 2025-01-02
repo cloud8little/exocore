@@ -5,9 +5,10 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/ExocoreNetwork/exocore/utils"
 	"math"
 	"strings"
+
+	"github.com/ExocoreNetwork/exocore/utils"
 
 	"github.com/ethereum/go-ethereum/common"
 

@@ -1,10 +1,10 @@
 package types
 
 import (
-	"github.com/ExocoreNetwork/exocore/utils"
-	"github.com/ExocoreNetwork/exocore/x/operator/types"
-	"golang.org/x/xerrors"
 	"strings"
+
+	"github.com/ExocoreNetwork/exocore/utils"
+	"golang.org/x/xerrors"
 
 	assetstypes "github.com/ExocoreNetwork/exocore/x/assets/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -23,6 +23,13 @@ const (
 
 	// RouterKey to be used for message routing
 	RouterKey = ModuleName
+
+	// AccAddressLength is used to parse the key, because the length isn't padded in the key
+	// This might be removed if the address length is padded in the key
+	AccAddressLength = 20
+
+	// ByteLengthForUint64 the type of chainID length is uint64, uint64 has 8 bytes.
+	ByteLengthForUint64 = 8
 )
 
 // ModuleAddress is the native module address for EVM
@@ -120,7 +127,7 @@ type UndelegationKeyFields struct {
 }
 
 func ParseUndelegationRecordKey(key []byte) (field *UndelegationKeyFields, err error) {
-	expectLength := types.AccAddressLength + 2*types.ByteLengthForUint64 + common.HashLength
+	expectLength := AccAddressLength + 2*ByteLengthForUint64 + common.HashLength
 	if len(key) != expectLength {
 		return nil, xerrors.Errorf(
 			"invalid undelegation record key, expectedLength:%d,actualLength:%d",
@@ -128,15 +135,15 @@ func ParseUndelegationRecordKey(key []byte) (field *UndelegationKeyFields, err e
 	}
 	// operator accAddress: 20bytes
 	startIndex := 0
-	operatorAccAddr := sdk.AccAddress(key[startIndex : startIndex+types.AccAddressLength])
+	operatorAccAddr := sdk.AccAddress(key[startIndex : startIndex+AccAddressLength])
 	// the height type is uint64: 8bytes
-	startIndex += types.AccAddressLength
-	height := sdk.BigEndianToUint64(key[startIndex : startIndex+types.ByteLengthForUint64])
+	startIndex += AccAddressLength
+	height := sdk.BigEndianToUint64(key[startIndex : startIndex+ByteLengthForUint64])
 	// the nonce type is uint64: 8bytes
-	startIndex += types.ByteLengthForUint64
-	txNonce := sdk.BigEndianToUint64(key[startIndex : startIndex+types.ByteLengthForUint64])
+	startIndex += ByteLengthForUint64
+	txNonce := sdk.BigEndianToUint64(key[startIndex : startIndex+ByteLengthForUint64])
 	// txHash: 32bytes
-	startIndex += types.ByteLengthForUint64
+	startIndex += ByteLengthForUint64
 	txHash := common.BytesToHash(key[startIndex : startIndex+common.HashLength])
 	return &UndelegationKeyFields{
 		OperatorAddr: operatorAccAddr.String(),
@@ -170,16 +177,16 @@ func GetPendingUndelegationRecordKey(epochIdentifier string, epochNumber int64, 
 }
 
 func ParsePendingUndelegationKey(key []byte) (field *PendingUndelegationKeyFields, err error) {
-	if len(key) <= 3*types.ByteLengthForUint64 {
+	if len(key) <= 3*ByteLengthForUint64 {
 		return nil, xerrors.New("ParsePendingUndelegationKey,key length is too short to contain epoch info and nonce")
 	}
-	identifierLen := sdk.BigEndianToUint64(key[0:types.ByteLengthForUint64])
-	if uint64(len(key)) != uint64(3*types.ByteLengthForUint64)+identifierLen {
-		return nil, xerrors.Errorf("ParsePendingUndelegationKey,key length is invalid,expect:%d,actual:%d", uint64(3*types.ByteLengthForUint64)+identifierLen, len(key))
+	identifierLen := sdk.BigEndianToUint64(key[0:ByteLengthForUint64])
+	if uint64(len(key)) != uint64(3*ByteLengthForUint64)+identifierLen {
+		return nil, xerrors.Errorf("ParsePendingUndelegationKey,key length is invalid,expect:%d,actual:%d", uint64(3*ByteLengthForUint64)+identifierLen, len(key))
 	}
-	epochIdentifier := string(key[types.ByteLengthForUint64 : types.ByteLengthForUint64+identifierLen])
-	epochNumber := sdk.BigEndianToUint64(key[types.ByteLengthForUint64+identifierLen : types.ByteLengthForUint64*2+identifierLen])
-	txNonce := sdk.BigEndianToUint64(key[types.ByteLengthForUint64*2+identifierLen:])
+	epochIdentifier := string(key[ByteLengthForUint64 : ByteLengthForUint64+identifierLen])
+	epochNumber := sdk.BigEndianToUint64(key[ByteLengthForUint64+identifierLen : ByteLengthForUint64*2+identifierLen])
+	txNonce := sdk.BigEndianToUint64(key[ByteLengthForUint64*2+identifierLen:])
 	return &PendingUndelegationKeyFields{
 		EpochIdentifier: epochIdentifier,
 		EpochNumber:     epochNumber,

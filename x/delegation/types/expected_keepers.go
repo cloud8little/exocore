@@ -9,8 +9,6 @@ import (
 
 var _ SlashKeeper = VirtualSlashKeeper{}
 
-var CanUndelegationDelayHeight = uint64(10)
-
 type SlashKeeper interface {
 	IsOperatorFrozen(ctx sdk.Context, opAddr sdk.AccAddress) bool
 	OperatorAssetSlashedProportion(ctx sdk.Context, opAddr sdk.AccAddress, assetID string, startHeight, endHeight uint64) sdkmath.LegacyDec

@@ -2,8 +2,10 @@ package types
 
 import (
 	"encoding/binary"
-	"github.com/ExocoreNetwork/exocore/utils"
 	"math"
+
+	"github.com/ExocoreNetwork/exocore/utils"
+	delegationtypes "github.com/ExocoreNetwork/exocore/x/delegation/types"
 
 	"golang.org/x/xerrors"
 
@@ -27,13 +29,6 @@ const (
 	DefaultOptedOutHeight = uint64(math.MaxUint64)
 
 	SlashVetoDuration = int64(1000)
-
-	// AccAddressLength is used to parse the key, because the length isn't padded in the key
-	// This might be removed if the address length is padded in the key
-	AccAddressLength = 20
-
-	// ByteLengthForUint64 the type of chainID length is uint64, uint64 has 8 bytes.
-	ByteLengthForUint64 = 8
 )
 
 const (
@@ -167,8 +162,8 @@ func KeyForVotingPowerSnapshot(avs common.Address, height int64) []byte {
 }
 
 func ParseVotingPowerSnapshotKey(key []byte) (string, int64, error) {
-	if len(key) != common.AddressLength+ByteLengthForUint64 {
-		return "", 0, xerrors.Errorf("invalid snapshot key length,expected:%d,got:%d", common.AddressLength+ByteLengthForUint64, len(key))
+	if len(key) != common.AddressLength+delegationtypes.ByteLengthForUint64 {
+		return "", 0, xerrors.Errorf("invalid snapshot key length,expected:%d,got:%d", common.AddressLength+delegationtypes.ByteLengthForUint64, len(key))
 	}
 	avsAddr := common.Address(key[:common.AddressLength])
 	height := binary.BigEndian.Uint64(key[common.AddressLength:])
@@ -177,23 +172,23 @@ func ParseVotingPowerSnapshotKey(key []byte) (string, int64, error) {
 }
 
 func ParseKeyForOperatorAndChainIDToConsKey(key []byte) (addr sdk.AccAddress, chainID string, err error) {
-	if len(key) < AccAddressLength+ByteLengthForUint64 {
+	if len(key) < delegationtypes.AccAddressLength+delegationtypes.ByteLengthForUint64 {
 		return nil, "", xerrors.New("key length is too short to contain address and chainID length")
 	}
 	// Extract the address
-	addr = key[0:AccAddressLength]
+	addr = key[0:delegationtypes.AccAddressLength]
 	if len(addr) == 0 {
 		return nil, "", xerrors.New("missing address")
 	}
 
 	// Extract the chainID length
-	chainIDLen := sdk.BigEndianToUint64(key[AccAddressLength : AccAddressLength+ByteLengthForUint64])
-	if len(key) != int(AccAddressLength+ByteLengthForUint64+chainIDLen) {
-		return nil, "", xerrors.Errorf("invalid key length,expected:%d,got:%d", AccAddressLength+ByteLengthForUint64+chainIDLen, len(key))
+	chainIDLen := sdk.BigEndianToUint64(key[delegationtypes.AccAddressLength : delegationtypes.AccAddressLength+delegationtypes.ByteLengthForUint64])
+	if len(key) != int(delegationtypes.AccAddressLength+delegationtypes.ByteLengthForUint64+chainIDLen) {
+		return nil, "", xerrors.Errorf("invalid key length,expected:%d,got:%d", delegationtypes.AccAddressLength+delegationtypes.ByteLengthForUint64+chainIDLen, len(key))
 	}
 
 	// Extract the chainID
-	chainIDBytes := key[AccAddressLength+ByteLengthForUint64:]
+	chainIDBytes := key[delegationtypes.AccAddressLength+delegationtypes.ByteLengthForUint64:]
 	chainID = string(chainIDBytes)
 
 	return addr, chainID, nil
@@ -208,22 +203,22 @@ func KeyForChainIDAndOperatorToPrevConsKey(chainID string, addr sdk.AccAddress) 
 
 func ParsePrevConsKey(key []byte) (chainID string, addr sdk.AccAddress, err error) {
 	// Check if the key has at least eight byte for the chainID length
-	if len(key) < ByteLengthForUint64 {
+	if len(key) < delegationtypes.ByteLengthForUint64 {
 		return "", nil, xerrors.New("key length is too short to contain chainID length")
 	}
 
 	// Extract the chainID length
-	chainIDLen := sdk.BigEndianToUint64(key[0:ByteLengthForUint64])
-	if len(key) < int(ByteLengthForUint64+chainIDLen) {
+	chainIDLen := sdk.BigEndianToUint64(key[0:delegationtypes.ByteLengthForUint64])
+	if len(key) < int(delegationtypes.ByteLengthForUint64+chainIDLen) {
 		return "", nil, xerrors.New("key too short for chainID length")
 	}
 
 	// Extract the chainID
-	chainIDBytes := key[ByteLengthForUint64 : ByteLengthForUint64+chainIDLen]
+	chainIDBytes := key[delegationtypes.ByteLengthForUint64 : delegationtypes.ByteLengthForUint64+chainIDLen]
 	chainID = string(chainIDBytes)
 
 	// Extract the address
-	addr = key[ByteLengthForUint64+chainIDLen:]
+	addr = key[delegationtypes.ByteLengthForUint64+chainIDLen:]
 	if len(addr) == 0 {
 		return "", nil, xerrors.New("missing address")
 	}
@@ -255,24 +250,24 @@ func KeyForOperatorKeyRemovalForChainID(addr sdk.AccAddress, chainID string) []b
 
 func ParseKeyForOperatorKeyRemoval(key []byte) (addr sdk.AccAddress, chainID string, err error) {
 	// Check if the key has at least 20 byte for the operator and eight byte for the chainID length
-	if len(key) < AccAddressLength+ByteLengthForUint64 {
+	if len(key) < delegationtypes.AccAddressLength+delegationtypes.ByteLengthForUint64 {
 		return nil, "", xerrors.New("key length is too short to contain operator address and chainID length")
 	}
 
 	// Extract the address
-	addr = key[0:AccAddressLength]
+	addr = key[0:delegationtypes.AccAddressLength]
 	if len(addr) == 0 {
 		return nil, "", xerrors.New("missing address")
 	}
 
 	// Extract the chainID length
-	chainIDLen := sdk.BigEndianToUint64(key[AccAddressLength : AccAddressLength+ByteLengthForUint64])
-	if len(key) != int(AccAddressLength+ByteLengthForUint64+chainIDLen) {
-		return nil, "", xerrors.Errorf("invalid key length,expected:%d,got:%d", AccAddressLength+ByteLengthForUint64+chainIDLen, len(key))
+	chainIDLen := sdk.BigEndianToUint64(key[delegationtypes.AccAddressLength : delegationtypes.AccAddressLength+delegationtypes.ByteLengthForUint64])
+	if len(key) != int(delegationtypes.AccAddressLength+delegationtypes.ByteLengthForUint64+chainIDLen) {
+		return nil, "", xerrors.Errorf("invalid key length,expected:%d,got:%d", delegationtypes.AccAddressLength+delegationtypes.ByteLengthForUint64+chainIDLen, len(key))
 	}
 
 	// Extract the chainID
-	chainIDBytes := key[AccAddressLength+ByteLengthForUint64:]
+	chainIDBytes := key[delegationtypes.AccAddressLength+delegationtypes.ByteLengthForUint64:]
 	chainID = string(chainIDBytes)
 
 	return addr, chainID, nil

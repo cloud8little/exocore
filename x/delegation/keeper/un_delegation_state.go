@@ -2,9 +2,11 @@ package keeper
 
 import (
 	"fmt"
-	"github.com/ExocoreNetwork/exocore/utils"
 	"math"
 	"strings"
+
+	"github.com/ExocoreNetwork/exocore/utils"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	errorsmod "cosmossdk.io/errors"
 
@@ -82,12 +84,11 @@ func (k *Keeper) DeleteUndelegationRecord(ctx sdk.Context, record *types.Undeleg
 }
 
 // GetUndelegationRecords returns the undelegation records for the provided record keys.
-func (k *Keeper) GetUndelegationRecords(ctx sdk.Context, singleRecordKeys []string) (record []*types.UndelegationRecord, err error) {
+func (k *Keeper) GetUndelegationRecords(ctx sdk.Context, singleRecordKeys [][]byte) (record []*types.UndelegationRecord, err error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixUndelegationInfo)
 	ret := make([]*types.UndelegationRecord, 0)
 	for _, singleRecordKey := range singleRecordKeys {
-		keyBytes := []byte(singleRecordKey)
-		value := store.Get(keyBytes)
+		value := store.Get(singleRecordKey)
 		if value == nil {
 			return nil, errorsmod.Wrap(types.ErrNoKeyInTheStore, fmt.Sprintf("undelegation record key doesn't exist: key is %s", singleRecordKey))
 		}
@@ -106,7 +107,8 @@ func (k *Keeper) IterateUndelegationsByOperator(
 	opFunc func(undelegation *types.UndelegationRecord) error,
 ) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixUndelegationInfo)
-	iterator := sdk.KVStorePrefixIterator(store, []byte(operator))
+	operatorAccAddress := sdk.MustAccAddressFromBech32(operator)
+	iterator := sdk.KVStorePrefixIterator(store, operatorAccAddress)
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {
@@ -136,14 +138,14 @@ func (k *Keeper) IterateUndelegationsByOperator(
 
 // GetStakerUndelegationRecKeys returns the undelegation record keys corresponding to the provided
 // staker and asset.
-func (k *Keeper) GetStakerUndelegationRecKeys(ctx sdk.Context, stakerID, assetID string) (recordKeyList []string, err error) {
+func (k *Keeper) GetStakerUndelegationRecKeys(ctx sdk.Context, stakerID, assetID string) (recordKeyList [][]byte, err error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixStakerUndelegationInfo)
 	iterator := sdk.KVStorePrefixIterator(store, []byte(strings.Join([]string{stakerID, assetID}, "/")))
 	defer iterator.Close()
 
-	ret := make([]string, 0)
+	ret := make([][]byte, 0)
 	for ; iterator.Valid(); iterator.Next() {
-		ret = append(ret, string(iterator.Value()))
+		ret = append(ret, iterator.Value())
 	}
 	return ret, nil
 }
@@ -163,7 +165,7 @@ func (k *Keeper) GetStakerUndelegationRecords(ctx sdk.Context, stakerID, assetID
 // operation is performed.
 func (k *Keeper) IterateUndelegationsByStakerAndAsset(
 	ctx sdk.Context, stakerID, assetID string, isUpdate bool,
-	opFunc func(undelegationKey string, undelegation *types.UndelegationRecord) (bool, error),
+	opFunc func(undelegationKey []byte, undelegation *types.UndelegationRecord) (bool, error),
 ) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixStakerUndelegationInfo)
 	iterator := sdk.KVStorePrefixIterator(store, types.IteratorPrefixForStakerAsset(stakerID, assetID))
@@ -176,7 +178,7 @@ func (k *Keeper) IterateUndelegationsByStakerAndAsset(
 		}
 		undelegation := types.UndelegationRecord{}
 		k.cdc.MustUnmarshal(infoValue, &undelegation)
-		isBreak, err := opFunc(string(iterator.Value()), &undelegation)
+		isBreak, err := opFunc(iterator.Value(), &undelegation)
 		if err != nil {
 			return err
 		}
@@ -191,69 +193,101 @@ func (k *Keeper) IterateUndelegationsByStakerAndAsset(
 	return nil
 }
 
-// GetCompletablePendingUndelegations returns the undelegation records scheduled to completed at the end
-// of the block. The pending undelegations should be expired and aren't held
-func (k *Keeper) GetCompletablePendingUndelegations(ctx sdk.Context) ([]*types.UndelegationRecord, error) {
+func (k *Keeper) GetUnCompletableUndelegations(ctx sdk.Context, epochIdentifier string, epochNumber int64) ([]*types.UndelegationRecord, error) {
 	records := make([]*types.UndelegationRecord, 0)
-	expiredUndelegationOpFunc := func(recordKey []byte, record *types.UndelegationRecord) error {
-		if k.GetUndelegationHoldCount(ctx, recordKey) > 0 {
-			// The expired pending undelegation is held, so do not complete it;
-			// then, continue addressing the other expired pending undelegations.
-			k.Logger(ctx).Info("GetCompletablePendingUndelegations: the expired pending undelegation is held",
-				"staker", record.StakerID,
-				"assset", record.AssetID,
-				"operator", record.OperatorAddr,
-				"submittedBlockNumber", record.BlockNumber,
-				"undelegationId", record.UndelegationId)
-			return nil
-		} else {
-			records = append(records, record)
-		}
+	expiredUndelegationOpFunc := func(_ []byte, record *types.UndelegationRecord) error {
+		records = append(records, record)
 		return nil
 	}
-	err := k.IterateExpiredPendingUndelegations(ctx, expiredUndelegationOpFunc)
+	err := k.IteratePendingUndelegations(ctx, false, epochIdentifier, epochNumber, expiredUndelegationOpFunc)
 	if err != nil {
 		return nil, err
 	}
 	return records, nil
 }
 
-func (k *Keeper) IterateExpiredPendingUndelegations(
-	ctx sdk.Context,
+// GetCompletableUndelegations returns the undelegation records scheduled to completed at the end
+// of the block. The pending undelegations should be expired and aren't held
+func (k *Keeper) GetCompletableUndelegations(ctx sdk.Context) ([]*types.UndelegationRecord, error) {
+	records := make([]*types.UndelegationRecord, 0)
+	expiredUndelegationOpFunc := func(_ []byte, record *types.UndelegationRecord) error {
+		records = append(records, record)
+		return nil
+	}
+	// iterate all pending undelegations across multiple epochs.
+	allEpochs := k.epochsKeeper.AllEpochInfos(ctx)
+	for _, epochInfo := range allEpochs {
+		err := k.IteratePendingUndelegations(ctx, true, epochInfo.Identifier, epochInfo.CurrentEpoch, expiredUndelegationOpFunc)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return records, nil
+}
+
+// IteratePendingUndelegations : This function iterates through all undelegations.
+// If the `isCompletable` flag is true, it retrieves all completable undelegations,
+// including the undelegations that are expired and not held.
+// If the `isCompletable` flag is false, it retrieves all undelegations that aren't completable,
+// including the undelegations that are unexpired and expired but held by the other processes.
+// The iteration leverages ascending or descending order to quickly fetch results
+// because undelegations are stored in the order of their epoch numbers.
+func (k *Keeper) IteratePendingUndelegations(
+	ctx sdk.Context, isCompletable bool, epochIdentifier string, currentEpoch int64,
 	opFunc func(recordKey []byte, undelegationRecord *types.UndelegationRecord) error,
 ) error {
 	pendingUndelegationStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixPendingUndelegations)
 	undelegationStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixUndelegationInfo)
-	// iterate all pending undelegations across multiple epochs.
-	allEpochs := k.epochsKeeper.AllEpochInfos(ctx)
-	for _, epochInfo := range allEpochs {
-		prefix := utils.AppendMany(
-			sdk.Uint64ToBigEndian(uint64(len(epochInfo.Identifier))),
-			[]byte(epochInfo.Identifier))
-
-		iterator := sdk.KVStorePrefixIterator(pendingUndelegationStore, prefix)
-		for ; iterator.Valid(); iterator.Next() {
-			pendingUndelegationKeys, err := types.ParsePendingUndelegationKey(iterator.Key())
-			if err != nil {
-				return err
-			}
-			if pendingUndelegationKeys.EpochNumber > uint64(epochInfo.CurrentEpoch) {
+	prefix := utils.AppendMany(
+		sdk.Uint64ToBigEndian(uint64(len(epochIdentifier))),
+		[]byte(epochIdentifier))
+	var iterator sdk.Iterator
+	if isCompletable {
+		iterator = sdk.KVStorePrefixIterator(pendingUndelegationStore, prefix)
+	} else {
+		iterator = sdk.KVStoreReversePrefixIterator(pendingUndelegationStore, prefix)
+	}
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		pendingUndelegationKeys, err := types.ParsePendingUndelegationKey(iterator.Key())
+		if err != nil {
+			return err
+		}
+		if isCompletable {
+			// Due to the current implementation, the completion of undelegation is triggered
+			// by per-block checks rather than using epoch hooks. As a result, when the epoch
+			// number to be completed equals the current epoch number, the undelegation remains
+			// in a pending state. It will only be completed after the current epoch ends, specifically
+			// in the first block of the next epoch.
+			// This logic might be changed if we chose epochHook to complete the undelgation in the future.
+			if pendingUndelegationKeys.EpochNumber >= uint64(currentEpoch) {
 				// These pending undelegations aren't expired, break the iteration
 				break
 			}
-			// call opFunc to execute some operations for the expired pending undelegations
-			value := undelegationStore.Get(iterator.Value())
-			if value == nil {
-				return errorsmod.Wrap(types.ErrNoKeyInTheStore, fmt.Sprintf("undelegation record key doesn't exist: key is %x", iterator.Value()))
+			if k.GetUndelegationHoldCount(ctx, iterator.Value()) > 0 {
+				// The expired pending undelegation is held, so do not complete it;
+				// then, continue addressing the other expired pending undelegations.
+				k.Logger(ctx).Info("IteratePendingUndelegations: the expired pending undelegation is held",
+					"recordKey", hexutil.Encode(iterator.Value()))
+				continue
 			}
-			undelegation := types.UndelegationRecord{}
-			k.cdc.MustUnmarshal(value, &undelegation)
-			err = opFunc(iterator.Value(), &undelegation)
-			if err != nil {
-				return err
-			}
+		} else if pendingUndelegationKeys.EpochNumber < uint64(currentEpoch) &&
+			k.GetUndelegationHoldCount(ctx, iterator.Value()) == 0 {
+			// These pending undelegations are expired and not held
+			continue
 		}
-		iterator.Close()
+
+		// call opFunc to execute some operations for the expired pending undelegations
+		value := undelegationStore.Get(iterator.Value())
+		if value == nil {
+			return errorsmod.Wrap(types.ErrNoKeyInTheStore, fmt.Sprintf("undelegation record key doesn't exist: key is %x", iterator.Value()))
+		}
+		undelegation := types.UndelegationRecord{}
+		k.cdc.MustUnmarshal(value, &undelegation)
+		err = opFunc(iterator.Value(), &undelegation)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -274,6 +308,9 @@ func (k Keeper) IncrementUndelegationHoldCount(ctx sdk.Context, recordKey []byte
 func (k *Keeper) GetUndelegationHoldCount(ctx sdk.Context, recordKey []byte) uint64 {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.GetUndelegationOnHoldKey(recordKey))
+	if bz == nil {
+		return 0
+	}
 	return sdk.BigEndianToUint64(bz)
 }
 

@@ -2,10 +2,11 @@ package keeper
 
 import (
 	"fmt"
-	"github.com/ExocoreNetwork/exocore/x/epochs/types"
-	"golang.org/x/xerrors"
 	"math"
 	"strings"
+
+	"github.com/ExocoreNetwork/exocore/x/epochs/types"
+	"golang.org/x/xerrors"
 
 	errorsmod "cosmossdk.io/errors"
 

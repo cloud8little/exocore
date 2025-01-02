@@ -20,10 +20,10 @@ func (k *Keeper) EndBlock(
 	originalCtx sdk.Context, _ abci.RequestEndBlock,
 ) []abci.ValidatorUpdate {
 	logger := k.Logger(originalCtx)
-	records, err := k.GetCompletablePendingUndelegations(originalCtx)
+	records, err := k.GetCompletableUndelegations(originalCtx)
 	if err != nil {
 		// When encountering an error while retrieving pending undelegation, skip the undelegation at the given height without causing the node to stop running.
-		logger.Error("Error in GetCompletablePendingUndelegations during the delegation's EndBlock execution", "error", err)
+		logger.Error("Error in GetCompletableUndelegations during the delegation's EndBlock execution", "error", err)
 		return []abci.ValidatorUpdate{}
 	}
 	if len(records) == 0 {

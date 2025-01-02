@@ -143,11 +143,11 @@ func (k *Keeper) UndelegateFrom(ctx sdk.Context, params *delegationtype.Delegati
 		Amount:                removeToken,
 		ActualCompletedAmount: removeToken,
 	}
-	completedEpochId, completedEpochNumber, err := k.operatorKeeper.GetUnbondingExpiration(ctx, params.OperatorAddress)
+	completedEpochID, completedEpochNumber, err := k.operatorKeeper.GetUnbondingExpiration(ctx, params.OperatorAddress)
 	if err != nil {
 		return err
 	}
-	r.CompletedEpochIdentifier = completedEpochId
+	r.CompletedEpochIdentifier = completedEpochID
 	r.CompletedEpochNumber = completedEpochNumber
 	err = k.SetUndelegationRecords(ctx, []delegationtype.UndelegationRecord{r})
 	if err != nil {

@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"cosmossdk.io/math"
+	delegationtypes "github.com/ExocoreNetwork/exocore/x/delegation/types"
 
 	operatortype "github.com/ExocoreNetwork/exocore/x/operator/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,7 +21,7 @@ func (suite *OperatorTestSuite) TestOperatorInfo() {
 		},
 		Commission: stakingtypes.NewCommission(math.LegacyZeroDec(), math.LegacyZeroDec(), math.LegacyZeroDec()),
 	}
-	suite.Equal(operatortype.AccAddressLength, len(suite.AccAddress))
+	suite.Equal(delegationtypes.AccAddressLength, len(suite.AccAddress))
 	err := suite.App.OperatorKeeper.SetOperatorInfo(suite.Ctx, suite.AccAddress.String(), info)
 	suite.NoError(err)
 

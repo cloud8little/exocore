@@ -29,7 +29,7 @@ func GetQueryCmd() *cobra.Command {
 		QuerySingleDelegationInfo(),
 		QueryDelegationInfo(),
 		QueryUndelegations(),
-		QueryUndelegationsByHeight(),
+		QueryUndelegationsByEpochInfo(),
 		QueryUndelegationHoldCount(),
 		QueryAssociatedOperatorByStaker(),
 		QueryAssociatedStakersByOperator(),
@@ -153,27 +153,28 @@ func QueryUndelegations() *cobra.Command {
 	return cmd
 }
 
-// QueryUndelegationsByHeight queries all undelegations waiting to be completed by height
-func QueryUndelegationsByHeight() *cobra.Command {
+// QueryUndelegationsByEpochInfo queries all undelegations waiting to be completed by epoch info.
+func QueryUndelegationsByEpochInfo() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "QueryUndelegationsByHeight <height>",
+		Use:   "QueryUndelegationsByEpochInfo <epoch_identifier> <epoch_number>",
 		Short: "Get undelegations waiting to be completed",
 		Long:  "Get undelegations waiting to be completed",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
-			height, err := strconv.ParseUint(args[0], 10, 64)
+			epochNumber, err := strconv.ParseInt(args[1], 10, 64)
 			if err != nil {
 				return err
 			}
 			queryClient := delegationtype.NewQueryClient(clientCtx)
-			req := &delegationtype.UndelegationsByHeightReq{
-				BlockHeight: height,
+			req := &delegationtype.UndelegationsByEpochInfoReq{
+				EpochIdentifier: args[0],
+				EpochNumber:     epochNumber,
 			}
-			res, err := queryClient.QueryUndelegationsByHeight(context.Background(), req)
+			res, err := queryClient.QueryUndelegationsByEpochInfo(context.Background(), req)
 			if err != nil {
 				return err
 			}
