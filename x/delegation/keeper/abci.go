@@ -14,8 +14,12 @@ import (
 // We use EndBlock instead of epoch hooks to trigger completion because we want
 // expired pending undelegations that are still held to be completed per block,
 // rather than per epoch.
-// However, the implementation can be switched to an epoch hook if it is deemed
-// better to complete expired pending undelegations that are still held by epoch.
+// Another reason is that we use a custom NullEpoch to handle pending undelegations that
+// are not restricted by any unbonding duration. These undelegations are completed immediately
+// at the end of the block after the transaction is committed on-chain. If we were to use an
+// epochHook, we might need to consider using minutes as the default unbonding duration for
+// these undelegations. However, such an implementation would mandate that the system enable
+// minute-based epochs.
 func (k *Keeper) EndBlock(
 	originalCtx sdk.Context, _ abci.RequestEndBlock,
 ) []abci.ValidatorUpdate {

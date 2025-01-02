@@ -1,8 +1,9 @@
 package keeper_test
 
 import (
-	abci "github.com/cometbft/cometbft/abci/types"
 	"time"
+
+	abci "github.com/cometbft/cometbft/abci/types"
 
 	sdkmath "cosmossdk.io/math"
 	avstypes "github.com/ExocoreNetwork/exocore/x/avs/types"
@@ -61,7 +62,7 @@ func (suite *OperatorTestSuite) TestSlashWithInfractionReason() {
 	epochInfo, found := suite.App.EpochsKeeper.GetEpochInfo(suite.Ctx, completedEpochId)
 	suite.True(found)
 	// the reason of plussing 1 is that the undelegation will be completed at the start height of completedEpochNumber+1
-	//completedTime := epochInfo.CurrentEpochStartTime.Add(time.Duration(completedEpochNumber+1-epochInfo.CurrentEpoch) * epochInfo.Duration)
+	// completedTime := epochInfo.CurrentEpochStartTime.Add(time.Duration(completedEpochNumber+1-epochInfo.CurrentEpoch) * epochInfo.Duration)
 
 	// trigger the slash with a downtime event
 	// run to next block

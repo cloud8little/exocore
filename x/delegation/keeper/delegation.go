@@ -149,7 +149,11 @@ func (k *Keeper) UndelegateFrom(ctx sdk.Context, params *delegationtype.Delegati
 	}
 	r.CompletedEpochIdentifier = completedEpochID
 	r.CompletedEpochNumber = completedEpochNumber
-	err = k.SetUndelegationRecords(ctx, []delegationtype.UndelegationRecord{r})
+	err = k.SetUndelegationRecords(ctx, false, []delegationtype.UndelegationRecordWithHoldCount{
+		{
+			Undelegation: &r,
+		},
+	})
 	if err != nil {
 		return err
 	}

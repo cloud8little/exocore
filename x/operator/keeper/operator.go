@@ -5,7 +5,8 @@ import (
 	"math"
 	"strings"
 
-	"github.com/ExocoreNetwork/exocore/x/epochs/types"
+	delegationtypes "github.com/ExocoreNetwork/exocore/x/delegation/types"
+
 	"golang.org/x/xerrors"
 
 	errorsmod "cosmossdk.io/errors"
@@ -272,15 +273,10 @@ func (k Keeper) GetUnbondingExpiration(ctx sdk.Context, operator sdk.AccAddress)
 		return "", 0, err
 	}
 	// calculate the maximum unbonding expiration
-	// Using minutes and the next epoch number as the default unbonding expiration.
-	// This requires the Exocore chain to have minute-level epoch functionality enabled.
-	minuteEpochInfo, exist := k.epochsKeeper.GetEpochInfo(ctx, types.MinuteEpochID)
-	if !exist {
-		return "", 0, errorsmod.Wrapf(operatortypes.ErrEpochIdentifierNotExist, "identifier:%s", types.MinuteEpochID)
-	}
-	retEpochIdentifier := types.MinuteEpochID
-	retEpochNumber := minuteEpochInfo.CurrentEpoch + 1
-	maxDurationSeconds := uint64(minuteEpochInfo.Duration)
+	// Using self-definied NullEpochIdentifier and NullEpochNumber as the default unbonding expiration.
+	retEpochIdentifier := delegationtypes.NullEpochIdentifier
+	retEpochNumber := delegationtypes.NullEpochNumber
+	maxDurationSeconds := uint64(0)
 	for _, avs := range avsList {
 		epochInfo, err := k.avsKeeper.GetAVSEpochInfo(ctx, avs)
 		if err != nil {

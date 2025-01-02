@@ -17,16 +17,20 @@ import (
 
 // AllUndelegations function returns all the undelegation records in the module.
 // It is used during `ExportGenesis` to export the undelegation records.
-func (k Keeper) AllUndelegations(ctx sdk.Context) (undelegations []types.UndelegationRecord, err error) {
+func (k Keeper) AllUndelegations(ctx sdk.Context) (undelegations []types.UndelegationRecordWithHoldCount, err error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixUndelegationInfo)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 
-	ret := make([]types.UndelegationRecord, 0)
+	ret := make([]types.UndelegationRecordWithHoldCount, 0)
 	for ; iterator.Valid(); iterator.Next() {
 		var undelegation types.UndelegationRecord
 		k.cdc.MustUnmarshal(iterator.Value(), &undelegation)
-		ret = append(ret, undelegation)
+		holdCount := k.GetUndelegationHoldCount(ctx, iterator.Key())
+		ret = append(ret, types.UndelegationRecordWithHoldCount{
+			Undelegation: &undelegation,
+			HoldCount:    holdCount,
+		})
 	}
 	return ret, nil
 }
@@ -38,29 +42,38 @@ func (k Keeper) AllUndelegations(ctx sdk.Context) (undelegations []types.Undeleg
 // (3) epochIdentifierLength + completedEpochIdentifier + completedEpochNumber + UndelegationID => recordKey
 // If a record exists with the same key, it will be overwritten; however, that is not a big
 // concern since the lzNonce and txHash are unique for each record.
-func (k *Keeper) SetUndelegationRecords(ctx sdk.Context, records []types.UndelegationRecord) error {
+func (k *Keeper) SetUndelegationRecords(ctx sdk.Context, isGenesis bool, records []types.UndelegationRecordWithHoldCount) error {
 	singleRecordStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixUndelegationInfo)
 	stakerUndelegationStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixStakerUndelegationInfo)
 	pendingUndelegationStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixPendingUndelegations)
+	store := ctx.KVStore(k.storeKey)
+
 	for i := range records {
-		record := records[i]
-		epochInfo, exist := k.epochsKeeper.GetEpochInfo(ctx, record.CompletedEpochIdentifier)
-		if !exist {
-			return errorsmod.Wrapf(types.ErrEpochIdentifierNotExist, "identifier:%s", record.CompletedEpochIdentifier)
+		undelegation := records[i].Undelegation
+		if undelegation.CompletedEpochIdentifier != types.NullEpochIdentifier {
+			epochInfo, exist := k.epochsKeeper.GetEpochInfo(ctx, undelegation.CompletedEpochIdentifier)
+			if !exist {
+				return errorsmod.Wrapf(types.ErrEpochIdentifierNotExist, "identifier:%s", undelegation.CompletedEpochIdentifier)
+			}
+			if undelegation.CompletedEpochNumber < epochInfo.CurrentEpoch {
+				return errorsmod.Wrapf(types.ErrInvalidCompletionEpoch, "epochIdentifier:%s,currentEpochNumber:%d,CompleteEpochNumber:%d", undelegation.CompletedEpochIdentifier, epochInfo.CurrentEpoch, undelegation.CompletedEpochNumber)
+			}
 		}
-		if record.CompletedEpochNumber < epochInfo.CurrentEpoch {
-			return errorsmod.Wrapf(types.ErrInvalidCompletionEpoch, "epochIdentifier:%s,currentEpochNumber:%d,CompleteEpochNumber:%d", record.CompletedEpochIdentifier, epochInfo.CurrentEpoch, record.CompletedEpochNumber)
-		}
-		bz := k.cdc.MustMarshal(&record)
+		bz := k.cdc.MustMarshal(undelegation)
 		// todo: check if the following state can only be set once?
-		singleRecKey := types.GetUndelegationRecordKey(record.BlockNumber, record.UndelegationId, record.TxHash, record.OperatorAddr)
+		singleRecKey := types.GetUndelegationRecordKey(undelegation.BlockNumber, undelegation.UndelegationId, undelegation.TxHash, undelegation.OperatorAddr)
 		singleRecordStore.Set(singleRecKey, bz)
 
-		stakerKey := types.GetStakerUndelegationRecordKey(record.StakerId, record.AssetId, record.UndelegationId)
+		stakerKey := types.GetStakerUndelegationRecordKey(undelegation.StakerId, undelegation.AssetId, undelegation.UndelegationId)
 		stakerUndelegationStore.Set(stakerKey, singleRecKey)
 
-		pendingUndelegationKey := types.GetPendingUndelegationRecordKey(record.CompletedEpochIdentifier, record.CompletedEpochNumber, record.UndelegationId)
+		pendingUndelegationKey := types.GetPendingUndelegationRecordKey(undelegation.CompletedEpochIdentifier, undelegation.CompletedEpochNumber, undelegation.UndelegationId)
 		pendingUndelegationStore.Set(pendingUndelegationKey, singleRecKey)
+
+		if isGenesis {
+			// set on-hold count
+			store.Set(types.GetUndelegationOnHoldKey(singleRecKey), sdk.Uint64ToBigEndian(records[i].HoldCount))
+		}
 	}
 	return nil
 }
@@ -80,6 +93,10 @@ func (k *Keeper) DeleteUndelegationRecord(ctx sdk.Context, record *types.Undeleg
 
 	pendingUndelegationKey := types.GetPendingUndelegationRecordKey(record.CompletedEpochIdentifier, record.CompletedEpochNumber, record.UndelegationId)
 	pendingUndelegationStore.Delete(pendingUndelegationKey)
+
+	store := ctx.KVStore(k.storeKey)
+	// delegate on-hold record for the undelegation
+	store.Delete(types.GetUndelegationOnHoldKey(singleRecKey))
 	return nil
 }
 
@@ -214,6 +231,13 @@ func (k *Keeper) GetCompletableUndelegations(ctx sdk.Context) ([]*types.Undelega
 		records = append(records, record)
 		return nil
 	}
+
+	// For the null epoch, we set `types.NullEpochNumber + 1` as the virtual current epoch number,
+	// allowing the related undelegations to be completed at the end of the block.
+	err := k.IteratePendingUndelegations(ctx, true, types.NullEpochIdentifier, types.NullEpochNumber+1, expiredUndelegationOpFunc)
+	if err != nil {
+		return nil, err
+	}
 	// iterate all pending undelegations across multiple epochs.
 	allEpochs := k.epochsKeeper.AllEpochInfos(ctx)
 	for _, epochInfo := range allEpochs {
@@ -335,6 +359,13 @@ func (k Keeper) IncrementUndelegationID(ctx sdk.Context) error {
 	now := prev + 1
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.KeyPrefixUndelegationID, sdk.Uint64ToBigEndian(now))
+	return nil
+}
+
+// SetUndelegationID sets the global undelegation ID.
+func (k Keeper) SetUndelegationID(ctx sdk.Context, undelegationID uint64) error {
+	store := ctx.KVStore(k.storeKey)
+	store.Set(types.KeyPrefixUndelegationID, sdk.Uint64ToBigEndian(undelegationID))
 	return nil
 }
 

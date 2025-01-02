@@ -3,6 +3,8 @@ package types
 import (
 	"encoding/hex"
 
+	epochsTypes "github.com/ExocoreNetwork/exocore/x/epochs/types"
+
 	"github.com/ExocoreNetwork/exocore/utils"
 
 	errorsmod "cosmossdk.io/errors"
@@ -18,7 +20,7 @@ func NewGenesis(
 	associations []StakerToOperator,
 	delegationStates []DelegationStates,
 	stakersByOperator []StakersByOperator,
-	undelegations []UndelegationRecord,
+	undelegations []UndelegationRecordWithHoldCount,
 ) *GenesisState {
 	return &GenesisState{
 		Associations:      associations,
@@ -196,7 +198,8 @@ func (gs GenesisState) ValidateStakerList() error {
 }
 
 func (gs GenesisState) ValidateUndelegations() error {
-	validationFunc := func(_ int, undelegation UndelegationRecord) error {
+	validationFunc := func(_ int, undelegationRecord UndelegationRecordWithHoldCount) error {
+		undelegation := undelegationRecord.Undelegation
 		err := ValidateIDAndOperator(undelegation.StakerId, undelegation.AssetId, undelegation.OperatorAddr)
 		if err != nil {
 			return errorsmod.Wrap(ErrInvalidGenesisData, err.Error())
@@ -217,14 +220,30 @@ func (gs GenesisState) ValidateUndelegations() error {
 		}
 		if undelegation.ActualCompletedAmount.GT(undelegation.Amount) {
 			return errorsmod.Wrapf(
-				ErrInvalidGenesisData, "the completed amount shouldn't be greater than the submitted amount , undelegation：%v",
-				undelegation,
+				ErrInvalidGenesisData, "the completed amount shouldn't be greater than the submitted amount , undelegationRecord：%v",
+				undelegationRecord,
+			)
+		}
+		if undelegation.UndelegationId >= gs.UndelegationId {
+			return errorsmod.Wrapf(
+				ErrInvalidGenesisData, "the undelegationID should be less than the global undelegationID,undelegationID:%d,globalID:%d",
+				undelegation.UndelegationId, gs.UndelegationId,
+			)
+		}
+		switch undelegation.CompletedEpochIdentifier {
+		case NullEpochIdentifier, epochsTypes.MinuteEpochID,
+			epochsTypes.HourEpochID, epochsTypes.DayEpochID,
+			epochsTypes.WeekEpochID:
+		default:
+			return errorsmod.Wrapf(
+				ErrInvalidGenesisData, "invalid epoch identifier in the undelegation: %s",
+				undelegation.CompletedEpochIdentifier,
 			)
 		}
 		return nil
 	}
-	seenFieldValueFunc := func(undelegation UndelegationRecord) (string, struct{}) {
-		return undelegation.TxHash, struct{}{}
+	seenFieldValueFunc := func(record UndelegationRecordWithHoldCount) (string, struct{}) {
+		return record.Undelegation.TxHash, struct{}{}
 	}
 	_, err := utils.CommonValidation(gs.Undelegations, seenFieldValueFunc, validationFunc)
 	if err != nil {

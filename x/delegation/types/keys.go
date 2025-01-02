@@ -30,6 +30,11 @@ const (
 
 	// ByteLengthForUint64 the type of chainID length is uint64, uint64 has 8 bytes.
 	ByteLengthForUint64 = 8
+
+	// NullEpochIdentifier and NullEpochNumber are used to construct the key for undelegations
+	// that aren't restricted by any AVS unbonding configuration.
+	NullEpochIdentifier = "NullEpoch"
+	NullEpochNumber     = int64(0)
 )
 
 // ModuleAddress is the native module address for EVM
@@ -120,10 +125,10 @@ func GetUndelegationRecordKey(blockHeight, undelegationID uint64, txHash string,
 }
 
 type UndelegationKeyFields struct {
-	BlockHeight  uint64
-	TxNonce      uint64
-	TxHash       string
-	OperatorAddr string
+	BlockHeight    uint64
+	UndelegationID uint64
+	TxHash         string
+	OperatorAddr   string
 }
 
 func ParseUndelegationRecordKey(key []byte) (field *UndelegationKeyFields, err error) {
@@ -139,17 +144,17 @@ func ParseUndelegationRecordKey(key []byte) (field *UndelegationKeyFields, err e
 	// the height type is uint64: 8bytes
 	startIndex += AccAddressLength
 	height := sdk.BigEndianToUint64(key[startIndex : startIndex+ByteLengthForUint64])
-	// the nonce type is uint64: 8bytes
+	// the undelegationID type is uint64: 8bytes
 	startIndex += ByteLengthForUint64
-	txNonce := sdk.BigEndianToUint64(key[startIndex : startIndex+ByteLengthForUint64])
+	undelegationID := sdk.BigEndianToUint64(key[startIndex : startIndex+ByteLengthForUint64])
 	// txHash: 32bytes
 	startIndex += ByteLengthForUint64
 	txHash := common.BytesToHash(key[startIndex : startIndex+common.HashLength])
 	return &UndelegationKeyFields{
-		OperatorAddr: operatorAccAddr.String(),
-		BlockHeight:  height,
-		TxNonce:      txNonce,
-		TxHash:       txHash.String(),
+		OperatorAddr:   operatorAccAddr.String(),
+		BlockHeight:    height,
+		UndelegationID: undelegationID,
+		TxHash:         txHash.String(),
 	}, nil
 }
 
@@ -160,10 +165,10 @@ func GetStakerUndelegationRecordKey(stakerID, assetID string, lzNonce uint64) []
 type PendingUndelegationKeyFields struct {
 	EpochIdentifier string
 	EpochNumber     uint64
-	TxNonce         uint64
+	UndelegationID  uint64
 }
 
-func GetPendingUndelegationRecordKey(epochIdentifier string, epochNumber int64, nonce uint64) []byte {
+func GetPendingUndelegationRecordKey(epochIdentifier string, epochNumber int64, undelegationID uint64) []byte {
 	return utils.AppendMany(
 		// length of identifier,8bytes
 		sdk.Uint64ToBigEndian(uint64(len(epochIdentifier))),
@@ -171,8 +176,8 @@ func GetPendingUndelegationRecordKey(epochIdentifier string, epochNumber int64, 
 		[]byte(epochIdentifier),
 		// Append the epoch number,8bytes
 		sdk.Uint64ToBigEndian(uint64(epochNumber)),
-		// Append the nonce,8bytes
-		sdk.Uint64ToBigEndian(nonce),
+		// Append the undelegationID,8bytes
+		sdk.Uint64ToBigEndian(undelegationID),
 	)
 }
 
@@ -186,11 +191,11 @@ func ParsePendingUndelegationKey(key []byte) (field *PendingUndelegationKeyField
 	}
 	epochIdentifier := string(key[ByteLengthForUint64 : ByteLengthForUint64+identifierLen])
 	epochNumber := sdk.BigEndianToUint64(key[ByteLengthForUint64+identifierLen : ByteLengthForUint64*2+identifierLen])
-	txNonce := sdk.BigEndianToUint64(key[ByteLengthForUint64*2+identifierLen:])
+	undelegationID := sdk.BigEndianToUint64(key[ByteLengthForUint64*2+identifierLen:])
 	return &PendingUndelegationKeyFields{
 		EpochIdentifier: epochIdentifier,
 		EpochNumber:     epochNumber,
-		TxNonce:         txNonce,
+		UndelegationID:  undelegationID,
 	}, nil
 }
 

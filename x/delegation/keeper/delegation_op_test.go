@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	epochstypes "github.com/ExocoreNetwork/exocore/x/epochs/types"
-
 	errorsmod "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	assetskeeper "github.com/ExocoreNetwork/exocore/x/assets/keeper"
@@ -227,22 +225,19 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 	suite.NoError(err)
 	suite.Equal(1, len(records))
 	UndelegationRecord := &delegationtype.UndelegationRecord{
-		StakerId:              stakerID,
-		AssetId:               assetID,
-		OperatorAddr:          delegationEvent.OperatorAddress.String(),
-		TxHash:                delegationEvent.TxHash.String(),
-		BlockNumber:           uint64(suite.Ctx.BlockHeight()),
-		Amount:                delegationEvent.OpAmount,
-		ActualCompletedAmount: delegationEvent.OpAmount,
-		UndelegationId:        initialUndelegationID,
+		StakerId:                 stakerID,
+		AssetId:                  assetID,
+		OperatorAddr:             delegationEvent.OperatorAddress.String(),
+		TxHash:                   delegationEvent.TxHash.String(),
+		BlockNumber:              uint64(suite.Ctx.BlockHeight()),
+		Amount:                   delegationEvent.OpAmount,
+		ActualCompletedAmount:    delegationEvent.OpAmount,
+		UndelegationId:           initialUndelegationID,
+		CompletedEpochIdentifier: delegationtype.NullEpochIdentifier,
+		CompletedEpochNumber:     delegationtype.NullEpochNumber,
 	}
-	UndelegationRecord.CompletedEpochIdentifier = epochstypes.MinuteEpochID
-	minuteEpochInfo, found := suite.App.EpochsKeeper.GetEpochInfo(suite.Ctx, epochstypes.MinuteEpochID)
-	suite.True(found)
-	UndelegationRecord.CompletedEpochNumber = minuteEpochInfo.CurrentEpoch + 1
 	suite.Equal(UndelegationRecord, records[0])
-
-	waitUndelegationRecords, err := suite.App.DelegationKeeper.GetUnCompletableUndelegations(suite.Ctx, minuteEpochInfo.Identifier, minuteEpochInfo.CurrentEpoch)
+	waitUndelegationRecords, err := suite.App.DelegationKeeper.GetUnCompletableUndelegations(suite.Ctx, delegationtype.NullEpochIdentifier, delegationtype.NullEpochNumber)
 	suite.NoError(err)
 	suite.Equal(1, len(waitUndelegationRecords))
 	suite.Equal(UndelegationRecord, waitUndelegationRecords[0])
@@ -294,13 +289,13 @@ func (suite *DelegationTestSuite) TestUndelegateFrom() {
 		BlockNumber:              uint64(suite.Ctx.BlockHeight()),
 		Amount:                   delegationEvent.OpAmount,
 		ActualCompletedAmount:    delegationEvent.OpAmount,
-		CompletedEpochIdentifier: minuteEpochInfo.Identifier,
-		CompletedEpochNumber:     minuteEpochInfo.CurrentEpoch + 1,
+		CompletedEpochIdentifier: delegationtype.NullEpochIdentifier,
+		CompletedEpochNumber:     delegationtype.NullEpochNumber,
 		UndelegationId:           initialUndelegationID + 1,
 	}
 	suite.Equal(UndelegationRecord, records[0])
 
-	waitUndelegationRecords, err = suite.App.DelegationKeeper.GetUnCompletableUndelegations(suite.Ctx, minuteEpochInfo.Identifier, minuteEpochInfo.CurrentEpoch)
+	waitUndelegationRecords, err = suite.App.DelegationKeeper.GetUnCompletableUndelegations(suite.Ctx, delegationtype.NullEpochIdentifier, delegationtype.NullEpochNumber)
 	suite.NoError(err)
 	suite.Equal(2, len(waitUndelegationRecords))
 	suite.Equal(UndelegationRecord, waitUndelegationRecords[0])
