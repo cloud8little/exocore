@@ -102,9 +102,9 @@ message UndelegationsByEpochInfoReq {
   int64 epoch_number = 2;
 }
 
-// UndelegationRecordWithHoldCount includes the undelegation record and the
+// UndelegationAndHoldCount includes the undelegation record and the
 // hold count, which is used to construct the genesis state
-message UndelegationRecordWithHoldCount {
+message UndelegationAndHoldCount {
   // undelegation is the single undelegation record
   UndelegationRecord undelegation =1;
   // hold_count represents the number of holds on this undelegation
@@ -114,7 +114,7 @@ message UndelegationRecordWithHoldCount {
 // UndelegationRecordList is the response to query undelegations.
 message UndelegationRecordList {
   // undelegations is the returned undelegations with hold count
-  repeated UndelegationRecordWithHoldCount undelegations = 1;
+  repeated UndelegationAndHoldCount undelegations = 1;
 }
 
 // QueryAssociatedOperatorByStakerReq is the request to obtain the associated operator of the specified staker

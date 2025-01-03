@@ -206,7 +206,7 @@ func QueryUndelegationHoldCount() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			undelegationID, err := strconv.ParseUint(args[1], 10, 64)
+			undelegationID, err := strconv.ParseUint(args[2], 10, 64)
 			if err != nil {
 				return err
 			}

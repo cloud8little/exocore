@@ -20,7 +20,7 @@ func NewGenesis(
 	associations []StakerToOperator,
 	delegationStates []DelegationStates,
 	stakersByOperator []StakersByOperator,
-	undelegations []UndelegationRecordWithHoldCount,
+	undelegations []UndelegationAndHoldCount,
 ) *GenesisState {
 	return &GenesisState{
 		Associations:      associations,
@@ -198,7 +198,7 @@ func (gs GenesisState) ValidateStakerList() error {
 }
 
 func (gs GenesisState) ValidateUndelegations() error {
-	validationFunc := func(_ int, undelegationRecord UndelegationRecordWithHoldCount) error {
+	validationFunc := func(_ int, undelegationRecord UndelegationAndHoldCount) error {
 		undelegation := undelegationRecord.Undelegation
 		err := ValidateIDAndOperator(undelegation.StakerId, undelegation.AssetId, undelegation.OperatorAddr)
 		if err != nil {
@@ -242,7 +242,7 @@ func (gs GenesisState) ValidateUndelegations() error {
 		}
 		return nil
 	}
-	seenFieldValueFunc := func(record UndelegationRecordWithHoldCount) (string, struct{}) {
+	seenFieldValueFunc := func(record UndelegationAndHoldCount) (string, struct{}) {
 		return record.Undelegation.TxHash, struct{}{}
 	}
 	_, err := utils.CommonValidation(gs.Undelegations, seenFieldValueFunc, validationFunc)
