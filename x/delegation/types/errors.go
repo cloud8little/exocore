@@ -85,7 +85,7 @@ var (
 	)
 	ErrInvalidCompletionEpoch = errorsmod.Register(
 		ModuleName, 23,
-		"the epoch number to complete the unelegation is invalid",
+		"the epoch number to complete the undelegation is invalid",
 	)
 	ErrEpochIdentifierNotExist = errorsmod.Register(
 		ModuleName, 24,

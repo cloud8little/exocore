@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strings"
 
+	epochstypes "github.com/ExocoreNetwork/exocore/x/epochs/types"
+
 	ibcclienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 
 	"github.com/evmos/evmos/v16/crypto/ethsecp256k1"
@@ -36,6 +38,13 @@ const (
 	// DelimiterForID Delimiter used for constructing the stakerID and assetID.
 	DelimiterForID = "_"
 )
+
+var AllEpochs = []string{
+	epochstypes.MinuteEpochID,
+	epochstypes.HourEpochID,
+	epochstypes.DayEpochID,
+	epochstypes.WeekEpochID,
+}
 
 // IsMainnet returns true if the chain-id has the Evmos mainnet EIP155 chain prefix.
 func IsMainnet(chainID string) bool {

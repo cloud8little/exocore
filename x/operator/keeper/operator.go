@@ -225,8 +225,8 @@ func (k *Keeper) GetOptedInAVSForOperator(ctx sdk.Context, operatorAddr string) 
 	return avsList, nil
 }
 
-func (k *Keeper) GetImpactfulAVSForOperator(ctx sdk.Context, operatorAddr string) ([]string, error) {
-	avsList := make([]string, 0)
+func (k *Keeper) GetImpactfulAVSForOperator(ctx sdk.Context, operatorAddr string) ([]operatortypes.ImpactfulAVSInfo, error) {
+	avsList := make([]operatortypes.ImpactfulAVSInfo, 0)
 	opFunc := func(key []byte, optedInfo *operatortypes.OptedInfo) error {
 		keys, err := assetstype.ParseJoinedStoreKey(key, 2)
 		avsAddr := keys[1]
@@ -235,7 +235,7 @@ func (k *Keeper) GetImpactfulAVSForOperator(ctx sdk.Context, operatorAddr string
 		}
 		// add AVS currently opting in to the operator's list.
 		if optedInfo.OptedOutHeight == operatortypes.DefaultOptedOutHeight {
-			avsList = append(avsList, avsAddr)
+			avsList = append(avsList, operatortypes.ImpactfulAVSInfo{AVSAddr: avsAddr})
 		} else {
 			// Add AVS that have opted out but are still within the unbonding duration,
 			// and therefore still affect the operator, to the list.
@@ -248,13 +248,19 @@ func (k *Keeper) GetImpactfulAVSForOperator(ctx sdk.Context, operatorAddr string
 			if err != nil {
 				return err
 			}
+			if epochInfo.CurrentEpoch < epochNumber {
+				return xerrors.Errorf("GetImpactfulAVSForOperator: current epoch number is less than the retrieved epoch number by opted out height,avsAddr:%s,epochIdentifier:%s,currentEpochNumber:%d,optedOutEpochNumber:%d", avsAddr, epochInfo.Identifier, epochInfo.CurrentEpoch, epochNumber)
+			}
 			unbondingDuration, err := k.avsKeeper.GetAVSUnbondingDuration(ctx, avsAddr)
 			if err != nil {
 				return err
 			}
-			// #nosec G115
-			if epochNumber >= epochInfo.CurrentEpoch-int64(unbondingDuration) {
-				avsList = append(avsList, avsAddr)
+			if epochNumber > 0 && uint64(epochNumber)+unbondingDuration >= uint64(epochInfo.CurrentEpoch) {
+				avsList = append(avsList, operatortypes.ImpactfulAVSInfo{
+					AVSAddr:                  avsAddr,
+					HasOptedOut:              true,
+					OptOutUnbondingRemaining: uint64(epochNumber) + unbondingDuration - uint64(epochInfo.CurrentEpoch),
+				})
 			}
 		}
 		return nil
@@ -278,18 +284,25 @@ func (k Keeper) GetUnbondingExpiration(ctx sdk.Context, operator sdk.AccAddress)
 	retEpochNumber := delegationtypes.NullEpochNumber
 	maxDurationSeconds := uint64(0)
 	for _, avs := range avsList {
-		epochInfo, err := k.avsKeeper.GetAVSEpochInfo(ctx, avs)
+		epochInfo, err := k.avsKeeper.GetAVSEpochInfo(ctx, avs.AVSAddr)
 		if err != nil {
 			return "", 0, err
 		}
-		unbondingDuration, err := k.avsKeeper.GetAVSUnbondingDuration(ctx, avs)
+		unbondingDuration, err := k.avsKeeper.GetAVSUnbondingDuration(ctx, avs.AVSAddr)
 		if err != nil {
 			return "", 0, err
+		}
+		if avs.HasOptedOut {
+			unbondingDuration = avs.OptOutUnbondingRemaining
 		}
 		if unbondingDuration+uint64(epochInfo.CurrentEpoch) > uint64(math.MaxInt64) {
 			return "", 0, xerrors.New("the sum of unbondingDuration and the current epoch number exceeds the int64 range.")
 		}
 		durationSeconds := unbondingDuration * uint64(epochInfo.Duration)
+		// address the case that the unbonding time is the end of current epoch.
+		if unbondingDuration == 0 {
+			durationSeconds = uint64(epochInfo.CurrentEpochStartTime.Add(epochInfo.Duration).Sub(ctx.BlockTime()))
+		}
 		if durationSeconds > maxDurationSeconds {
 			retEpochIdentifier = epochInfo.Identifier
 			retEpochNumber = epochInfo.CurrentEpoch + int64(unbondingDuration)

@@ -255,6 +255,7 @@ func (k *Keeper) GetCompletableUndelegations(ctx sdk.Context) ([]*types.Undelega
 	// iterate all pending undelegations across multiple epochs.
 	allEpochs := k.epochsKeeper.AllEpochInfos(ctx)
 	for _, epochInfo := range allEpochs {
+		ctx.Logger().Info("GetCompletableUndelegations", "epochInfo", epochInfo.Identifier, "epochNumber", epochInfo.CurrentEpoch)
 		err := k.IteratePendingUndelegations(ctx, true, epochInfo.Identifier, epochInfo.CurrentEpoch, expiredUndelegationOpFunc)
 		if err != nil {
 			return nil, err
@@ -276,16 +277,13 @@ func (k *Keeper) IteratePendingUndelegations(
 ) error {
 	pendingUndelegationStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixPendingUndelegations)
 	undelegationStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixUndelegationInfo)
+
 	prefix := utils.AppendMany(
 		sdk.Uint64ToBigEndian(uint64(len(epochIdentifier))),
 		[]byte(epochIdentifier))
-	var iterator sdk.Iterator
-	if isCompletable {
-		iterator = sdk.KVStorePrefixIterator(pendingUndelegationStore, prefix)
-	} else {
-		iterator = sdk.KVStoreReversePrefixIterator(pendingUndelegationStore, prefix)
-	}
+	iterator := sdk.KVStorePrefixIterator(pendingUndelegationStore, prefix)
 	defer iterator.Close()
+
 	for ; iterator.Valid(); iterator.Next() {
 		pendingUndelegationKeys, err := types.ParsePendingUndelegationKey(iterator.Key())
 		if err != nil {
@@ -312,6 +310,8 @@ func (k *Keeper) IteratePendingUndelegations(
 		} else if pendingUndelegationKeys.EpochNumber < uint64(currentEpoch) &&
 			k.GetUndelegationHoldCount(ctx, iterator.Value()) == 0 {
 			// These pending undelegations are expired and not held
+			k.Logger(ctx).Info("IteratePendingUndelegations: the this undelegation is expired but not held",
+				"recordKey", hexutil.Encode(iterator.Value()))
 			continue
 		}
 

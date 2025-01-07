@@ -138,7 +138,7 @@ type OperatorHooks interface {
 	)
 	// AfterSlash This hook is called when an operator is slashed
 	AfterSlash(
-		ctx sdk.Context, addr sdk.AccAddress, affectedAVSList []string,
+		ctx sdk.Context, addr sdk.AccAddress, affectedAVSList []ImpactfulAVSInfo,
 	)
 }
 type StakingKeeper interface {
