@@ -16,7 +16,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// GetSlashIDForDogfood It use infractionType+'_'+'infractionHeight' as the slashID, because /* the slash  */event occurs in dogfood doesn't have a TxID. It isn't submitted through an external transaction.
+// GetSlashIDForDogfood It use infractionType+'_'+'infractionHeight' as the slashID, because /* the slash  */event occurs in
+// dogfood doesn't have a TxID. It isn't submitted through an external transaction.
 func GetSlashIDForDogfood(infraction stakingtypes.Infraction, infractionHeight int64) string {
 	slashIDBytes := utils.AppendMany(
 		utils.Uint32ToBigEndian(uint32(infraction)),
@@ -98,6 +99,17 @@ func (k *Keeper) SlashAssets(ctx sdk.Context, snapshotHeight int64, parameter *t
 			slashFromUndelegation := SlashFromUndelegation(undelegation, newSlashProportion)
 			if slashFromUndelegation != nil {
 				executionInfo.SlashUndelegations = append(executionInfo.SlashUndelegations, *slashFromUndelegation)
+				ctx.EventManager().EmitEvent(
+					sdk.NewEvent(
+						types.EventTypeUndelegationSlashed,
+						sdk.NewAttribute(types.AttributeKeyRecordID, hexutil.Encode(undelegation.GetKey())),
+						// amount left after slashing has been performed
+						sdk.NewAttribute(types.AttributeKeyAmount, undelegation.ActualCompletedAmount.String()),
+						// slashed quantity
+						sdk.NewAttribute(types.AttributeKeySlashAmount, slashFromUndelegation.Amount.String()),
+					),
+				)
+
 			}
 			return nil
 		}
@@ -109,8 +121,9 @@ func (k *Keeper) SlashAssets(ctx sdk.Context, snapshotHeight int64, parameter *t
 		}
 	}
 
-	// slash from the assets pool of the operator
+	// slash from the assets pool of the operator, emits operator asset info status event.
 	opFuncToIterateAssets := func(assetID string, state *assetstype.OperatorAssetInfo) error {
+		// iterate over each operator + asset and reduce the total amount by the slash amount
 		slashAmount := newSlashProportion.MulInt(state.TotalAmount).TruncateInt()
 		remainingAmount := state.TotalAmount.Sub(slashAmount)
 		// todo: consider slash all assets if the remaining amount is too small,
@@ -119,8 +132,7 @@ func (k *Keeper) SlashAssets(ctx sdk.Context, snapshotHeight int64, parameter *t
 		// all shares need to be cleared if the asset amount is slashed to zero,
 		// otherwise there will be a problem in updating the shares when handling
 		// the new delegations.
-		if remainingAmount.IsZero() &&
-			k.delegationKeeper.HasStakerList(ctx, parameter.Operator.String(), assetID) {
+		if remainingAmount.IsZero() && k.delegationKeeper.HasStakerList(ctx, parameter.Operator.String(), assetID) {
 			// clear the share of other stakers
 			stakerList, err := k.delegationKeeper.GetStakersByOperator(ctx, parameter.Operator.String(), assetID)
 			if err != nil {
@@ -138,11 +150,20 @@ func (k *Keeper) SlashAssets(ctx sdk.Context, snapshotHeight int64, parameter *t
 			state.OperatorShare = sdkmath.LegacyZeroDec()
 		}
 		state.TotalAmount = remainingAmount
-		// TODO: check if pendingUndelegation also zero => delete this item, and this operator should be opted out if all aasets falls to 0 since the miniself is not satisfied then.
+		// TODO: check if pendingUndelegation also zero => delete this item, and this operator should be opted out if
+		// all assets falls to 0 since the miniself is not satisfied then.
 		executionInfo.SlashAssetsPool = append(executionInfo.SlashAssetsPool, types.SlashFromAssetsPool{
 			AssetID: assetID,
 			Amount:  slashAmount,
 		})
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeOperatorAssetSlashed,
+				sdk.NewAttribute(types.AttributeKeyOperator, parameter.Operator.String()),
+				sdk.NewAttribute(types.AttributeKeyAssetID, assetID),
+				sdk.NewAttribute(types.AttributeKeyAmount, slashAmount.String()),
+			),
+		)
 		return nil
 	}
 	err = k.assetsKeeper.IterateAssetsForOperator(ctx, true, parameter.Operator.String(), nil, opFuncToIterateAssets)
