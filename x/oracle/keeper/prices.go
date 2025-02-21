@@ -4,10 +4,10 @@ import (
 	"encoding/binary"
 
 	sdkmath "cosmossdk.io/math"
-	assetstypes "github.com/ExocoreNetwork/exocore/x/assets/types"
-	"github.com/ExocoreNetwork/exocore/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	assetstypes "github.com/imua-xyz/imuachain/x/assets/types"
+	"github.com/imua-xyz/imuachain/x/oracle/types"
 )
 
 // SetPrices set a specific prices in the store from its index
@@ -55,8 +55,8 @@ func (k Keeper) GetPrices(
 
 // return latest price for one specified price
 func (k Keeper) GetSpecifiedAssetsPrice(ctx sdk.Context, assetID string) (types.Price, error) {
-	// for native token exo, we temporarily use default price
-	if assetID == assetstypes.ExocoreAssetID {
+	// for native token IMUA, we temporarily use default price
+	if assetID == assetstypes.ImuachainAssetID {
 		return types.Price{
 			Value:   sdkmath.NewInt(types.DefaultPriceValue),
 			Decimal: types.DefaultPriceDecimal,
@@ -99,8 +99,8 @@ func (k Keeper) GetMultipleAssetsPrices(ctx sdk.Context, assets map[string]inter
 	prices = make(map[string]types.Price)
 	info := ""
 	for assetID := range assets {
-		// for native token exo, we temporarily use default price
-		if assetID == assetstypes.ExocoreAssetID {
+		// for native token IMUA, we temporarily use default price
+		if assetID == assetstypes.ImuachainAssetID {
 			prices[assetID] = types.Price{
 				Value:   sdkmath.NewInt(types.DefaultPriceValue),
 				Decimal: types.DefaultPriceDecimal,

@@ -9,11 +9,11 @@ import (
 	"strings"
 
 	sdkerrors "cosmossdk.io/errors"
-	"github.com/ExocoreNetwork/exocore/x/oracle/keeper/common"
-	oracletypes "github.com/ExocoreNetwork/exocore/x/oracle/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/imua-xyz/imuachain/x/oracle/keeper/common"
+	oracletypes "github.com/imua-xyz/imuachain/x/oracle/types"
 )
 
 func NewFeederManager(k common.KeeperOracle) *FeederManager {
@@ -756,7 +756,7 @@ func (f *FeederManager) ProcessQuoteInRecovery(msgItems []*oracletypes.MsgItem) 
 func (f *FeederManager) initCaches(ctx sdk.Context) {
 	f.cs = newCaches()
 	params := f.k.GetParams(ctx)
-	validatorSet := f.k.GetAllExocoreValidators(ctx)
+	validatorSet := f.k.GetAllImuachainValidators(ctx)
 	validatorPowers := make(map[string]*big.Int)
 	for _, v := range validatorSet {
 		validatorPowers[sdk.ConsAddress(v.Address).String()] = big.NewInt(v.Power)
@@ -782,7 +782,7 @@ func (f *FeederManager) recovery(ctx sdk.Context) (bool, error) {
 	params := replayRecentParamsList[0].Params
 	replayRecentParamsList = replayRecentParamsList[1:]
 
-	validatorSet := f.k.GetAllExocoreValidators(ctx)
+	validatorSet := f.k.GetAllImuachainValidators(ctx)
 	validatorPowers := make(map[string]*big.Int)
 	for _, v := range validatorSet {
 		validatorPowers[sdk.ConsAddress(v.Address).String()] = big.NewInt(v.Power)

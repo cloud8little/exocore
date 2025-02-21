@@ -4,13 +4,13 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-	dogfoodkeeper "github.com/ExocoreNetwork/exocore/x/dogfood/keeper"
-	dogfoodtypes "github.com/ExocoreNetwork/exocore/x/dogfood/types"
-	"github.com/ExocoreNetwork/exocore/x/oracle/types"
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/libs/log"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	dogfoodkeeper "github.com/imua-xyz/imuachain/x/dogfood/keeper"
+	dogfoodtypes "github.com/imua-xyz/imuachain/x/dogfood/types"
+	"github.com/imua-xyz/imuachain/x/oracle/types"
 )
 
 type Price struct {
@@ -81,7 +81,7 @@ type KeeperDogfood = interface {
 	GetValidatorUpdates(ctx sdk.Context) []abci.ValidatorUpdate
 	GetValidatorByConsAddr(ctx sdk.Context, consAddr sdk.ConsAddress) (validator stakingtypes.Validator, found bool)
 
-	GetAllExocoreValidators(ctx sdk.Context) (validators []dogfoodtypes.ExocoreValidator)
+	GetAllImuachainValidators(ctx sdk.Context) (validators []dogfoodtypes.ImuachainValidator)
 	ValidatorByConsAddr(ctx sdk.Context, addr sdk.ConsAddress) stakingtypes.ValidatorI
 	SlashWithInfractionReason(ctx sdk.Context, addr sdk.ConsAddress, infractionHeight, power int64, slashFactor sdk.Dec, infraction stakingtypes.Infraction) sdkmath.Int
 	Jail(ctx sdk.Context, addr sdk.ConsAddress)

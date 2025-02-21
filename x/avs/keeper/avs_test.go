@@ -6,22 +6,26 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
-	assetstypes "github.com/ExocoreNetwork/exocore/x/assets/types"
 	"github.com/ethereum/go-ethereum/common"
+	assetstypes "github.com/imua-xyz/imuachain/x/assets/types"
 
-	"github.com/ExocoreNetwork/exocore/x/avs/types"
-	avstypes "github.com/ExocoreNetwork/exocore/x/avs/types"
-	delegationtypes "github.com/ExocoreNetwork/exocore/x/delegation/types"
-	epochstypes "github.com/ExocoreNetwork/exocore/x/epochs/types"
-	operatorTypes "github.com/ExocoreNetwork/exocore/x/operator/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	utiltx "github.com/evmos/evmos/v16/testutil/tx"
+	"github.com/imua-xyz/imuachain/x/avs/types"
+	avstypes "github.com/imua-xyz/imuachain/x/avs/types"
+	delegationtypes "github.com/imua-xyz/imuachain/x/delegation/types"
+	epochstypes "github.com/imua-xyz/imuachain/x/epochs/types"
+	operatorTypes "github.com/imua-xyz/imuachain/x/operator/types"
 )
 
 func (suite *AVSTestSuite) TestAVS() {
 	avsName := "avsTest"
 	avsAddress := suite.avsAddress
-	avsOwnerAddress := []string{"exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkjr", "exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkj1", "exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkj2"}
+	avsOwnerAddress := []string{
+		sdk.AccAddress(utiltx.GenerateAddress().Bytes()).String(),
+		sdk.AccAddress(utiltx.GenerateAddress().Bytes()).String(),
+		sdk.AccAddress(utiltx.GenerateAddress().Bytes()).String(),
+	}
 	assetIDs := suite.AssetIDs
 	operatorAddress := sdk.AccAddress(utiltx.GenerateAddress().Bytes()).String()
 
@@ -39,7 +43,7 @@ func (suite *AVSTestSuite) TestAVS() {
 		MinTotalStakeAmount: 1000,
 		AvsSlash:            sdk.MustNewDecFromStr("0.001"),
 		AvsReward:           sdk.MustNewDecFromStr("0.002"),
-		TaskAddress:         "exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkjr",
+		TaskAddress:         sdk.AccAddress(utiltx.GenerateAddress().Bytes()).String(),
 		WhitelistAddresses:  []string{operatorAddress},
 	}
 
@@ -72,7 +76,11 @@ func (suite *AVSTestSuite) TestAVS() {
 
 func (suite *AVSTestSuite) TestUpdateAVSInfo_Register() {
 	avsName, avsAddres, slashAddress, rewardAddress := "avsTest", "0xDF907c29719154eb9872f021d21CAE6E5025d7aB", "0xDF907c29719154eb9872f021d21CAE6E5025d7aB", "0xDF907c29719154eb9872f021d21CAE6E5025d7aB"
-	avsOwnerAddress := []string{"exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkjr", "exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkj1", "exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkj2"}
+	avsOwnerAddress := []string{
+		sdk.AccAddress(utiltx.GenerateAddress().Bytes()).String(),
+		sdk.AccAddress(utiltx.GenerateAddress().Bytes()).String(),
+		sdk.AccAddress(utiltx.GenerateAddress().Bytes()).String(),
+	}
 	assetIDs := suite.AssetIDs
 
 	avsParams := &types.AVSRegisterOrDeregisterParams{
@@ -104,7 +112,11 @@ func (suite *AVSTestSuite) TestUpdateAVSInfo_Register() {
 func (suite *AVSTestSuite) TestUpdateAVSInfo_DeRegister() {
 	// Test case setup
 	avsName, avsAddress, slashAddress := "avsTest", suite.avsAddress.String(), "0xDF907c29719154eb9872f021d21CAE6E5025d7aB"
-	avsOwnerAddress := []string{"exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkjr", "exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkj1", "exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkj2"}
+	avsOwnerAddress := []string{
+		sdk.AccAddress(utiltx.GenerateAddress().Bytes()).String(),
+		sdk.AccAddress(utiltx.GenerateAddress().Bytes()).String(),
+		sdk.AccAddress(utiltx.GenerateAddress().Bytes()).String(),
+	}
 	assetIDs := suite.AssetIDs
 
 	avsParams := &types.AVSRegisterOrDeregisterParams{
@@ -127,6 +139,7 @@ func (suite *AVSTestSuite) TestUpdateAVSInfo_DeRegister() {
 	err = suite.App.AVSManagerKeeper.UpdateAVSInfo(suite.Ctx, avsParams)
 	suite.NoError(err)
 	info, err := suite.App.AVSManagerKeeper.GetAVSInfo(suite.Ctx, avsAddress)
+	suite.NoError(err)
 	suite.Equal(strings.ToLower(avsAddress), info.GetInfo().AvsAddress)
 
 	epoch, _ := suite.App.EpochsKeeper.GetEpochInfo(suite.Ctx, epochstypes.DayEpochID)
@@ -139,7 +152,8 @@ func (suite *AVSTestSuite) TestUpdateAVSInfo_DeRegister() {
 	}
 
 	avsParams.Action = avstypes.DeRegisterAction
-	avsParams.CallerAddress, err = sdk.AccAddressFromBech32("exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkjr")
+	avsParams.CallerAddress, err = sdk.AccAddressFromBech32(avsOwnerAddress[0])
+	suite.NoError(err)
 	err = suite.App.AVSManagerKeeper.UpdateAVSInfo(suite.Ctx, avsParams)
 	suite.NoError(err)
 	info, err = suite.App.AVSManagerKeeper.GetAVSInfo(suite.Ctx, avsAddress)
@@ -191,7 +205,7 @@ func (suite *AVSTestSuite) TestUpdateAVSInfoWithOperator_Register() {
 func (suite *AVSTestSuite) TestAddressSwitch() {
 	addr := common.HexToAddress("0x8dF46478a83Ab2a429979391E9546A12AfF9E33f")
 	var accAddress sdk.AccAddress = addr[:]
-	suite.Equal("exo13h6xg79g82e2g2vhjwg7j4r2z2hlncelwutkjr", accAddress.String())
+	suite.Equal("im13h6xg79g82e2g2vhjwg7j4r2z2hlncel7zgwsx", accAddress.String())
 	commonAddress := common.Address(accAddress)
 	suite.Equal(common.HexToAddress("0x8dF46478a83Ab2a429979391E9546A12AfF9E33f"), commonAddress)
 }
