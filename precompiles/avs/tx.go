@@ -314,14 +314,8 @@ func (p Precompile) RegisterBLSPublicKey(
 	if !ok {
 		return nil, fmt.Errorf(imuacmn.ErrContractInputParamOrType, 3, "[]byte", pubKeyRegistrationSignature)
 	}
-	blsParams.PubkeyRegistrationSignature = pubKeyRegistrationSignature
-
-	pubKeyRegistrationMessageHash, ok := args[4].([]byte)
-	if !ok {
-		return nil, fmt.Errorf(imuacmn.ErrContractInputParamOrType, 4, "[]byte", pubKeyRegistrationMessageHash)
-	}
-	blsParams.PubkeyRegistrationMessageHash = pubKeyRegistrationMessageHash
-
+	blsParams.PubKeyRegistrationSignature = pubKeyRegistrationSignature
+	// validates key format by itself so we don't need to do it before this.
 	err := p.avsKeeper.RegisterBLSPublicKey(ctx, blsParams)
 	if err != nil {
 		return nil, err

@@ -39,11 +39,10 @@ type TaskInfoParams struct {
 	CallerAddress         sdk.AccAddress `json:"caller_address"`
 }
 type BlsParams struct {
-	OperatorAddress               sdk.AccAddress
-	AvsAddress                    common.Address
-	PubKey                        []byte
-	PubkeyRegistrationSignature   []byte
-	PubkeyRegistrationMessageHash []byte
+	OperatorAddress             sdk.AccAddress
+	AvsAddress                  common.Address
+	PubKey                      []byte
+	PubKeyRegistrationSignature []byte
 }
 
 type ProofParams struct {

@@ -288,28 +288,46 @@ func (k Keeper) CreateAVSTask(ctx sdk.Context, params *types.TaskInfoParams) (ui
 
 func (k Keeper) RegisterBLSPublicKey(ctx sdk.Context, params *types.BlsParams) error {
 	// check bls signature to prevent rogue key attacks
-	sig := params.PubkeyRegistrationSignature
-	msgHash := params.PubkeyRegistrationMessageHash
-	pubKey, _ := bls.PublicKeyFromBytes(params.PubKey)
-	valid, err := blst.VerifySignature(sig, [32]byte(msgHash), pubKey)
+	// use a templated message to
+	// (1) validate that this signature is intended solely for RegisterBLSPublicKey
+	// (2) prevent replay attacks by including the chain-id and operator-address
+	// note that the operator address is bech32 encoded and thus already lowercase
+	msg := fmt.Sprintf(types.BLSMessageToSign, types.ChainIDWithoutRevision(ctx.ChainID()), params.OperatorAddress.String())
+	hashedMsg := crypto.Keccak256Hash([]byte(msg))
+
+	sig := params.PubKeyRegistrationSignature
+	pubKey, err := bls.PublicKeyFromBytes(params.PubKey)
+	if err != nil {
+		return errorsmod.Wrap(types.ErrParsePubKey, fmt.Sprintf("the operator is %s", params.OperatorAddress))
+	}
+	valid, err := blst.VerifySignature(sig, hashedMsg, pubKey)
 	if err != nil || !valid {
-		return errorsmod.Wrap(types.ErrSigNotMatchPubKey, fmt.Sprintf("the operator is :%s", params.OperatorAddress))
+		return errorsmod.Wrap(types.ErrSigNotMatchPubKey, fmt.Sprintf("the operator is %s", params.OperatorAddress))
 	}
+	// check that a key has not already been set for this operator and avs
 	if k.IsExistPubKeyForAVS(ctx, params.OperatorAddress.String(), params.AvsAddress.String()) {
-		return errorsmod.Wrap(types.ErrAlreadyExists, fmt.Sprintf("the operator is :%s", params.OperatorAddress))
+		return errorsmod.Wrap(
+			types.ErrAlreadyExists,
+			"a key has already been set for this operator and avs",
+		)
 	}
-	bls := &types.BlsPubKeyInfo{
+	blsInfo := &types.BlsPubKeyInfo{
 		AvsAddress:      strings.ToLower(params.AvsAddress.String()),
-		OperatorAddress: strings.ToLower(params.OperatorAddress.String()),
+		OperatorAddress: params.OperatorAddress.String(),
 		PubKey:          params.PubKey,
 	}
-	// check a bls key can only be used once.
-	// if operator are using multiple servers for different AVSs .
-	// In case one server is compromised, signing can continue as expected on the AVSs for which there has been no compromise.
-	if k.IsExistPubKey(ctx, bls) {
-		return errorsmod.Wrap(types.ErrAlreadyExists, fmt.Sprintf("the bls key is already exists:%s", bls.PubKey))
+	// verify that the BLS key is not already in use by
+	// (1) even the same operator on a different AVS
+	// (2) different operators on the same AVS
+	// this design decision is made to ensure that the same BLS key
+	// is not reused across different AVSs by the same operator
+	if k.IsExistPubKey(ctx, blsInfo) {
+		return errorsmod.Wrap(
+			types.ErrAlreadyExists,
+			"this BLS key is already in use",
+		)
 	}
-	return k.SetOperatorPubKey(ctx, bls)
+	return k.SetOperatorPubKey(ctx, blsInfo)
 }
 
 func (k Keeper) OperatorOptAction(ctx sdk.Context, params *types.OperatorOptParams) error {
@@ -411,7 +429,7 @@ func (k Keeper) GetAVSEpochInfo(ctx sdk.Context, addr string) (*epochstypes.Epoc
 	}
 	avsInfo := avsInfoResp.Info
 	// Epoch information must be available because it is checked when setting AVS information.
-	// Therefore, we don’t need to check it here.
+	// Therefore, we don't need to check it here.
 	epochInfo, _ := k.epochsKeeper.GetEpochInfo(ctx, avsInfo.EpochIdentifier)
 	return &epochInfo, nil
 }

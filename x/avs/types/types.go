@@ -48,7 +48,10 @@ var (
 	ChainIDPrefix = []byte("chain-id-prefix")
 )
 
-const InvalidTaskID = 0
+const (
+	InvalidTaskID    = 0
+	BLSMessageToSign = "BLS12-381 Signed Message\nChainIDWithoutRevision: %s\nAccAddressBech32: %s"
+)
 
 type AVSRegisterOrDeregisterParams struct {
 	// AvsName is the name of the AVS as an arbitrary string.
