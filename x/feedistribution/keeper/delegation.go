@@ -504,6 +504,14 @@ func (k Keeper) GetStakerUnclaimedRewards(ctx sdk.Context, stakerID string) ([]f
 			if err != nil {
 				return false, err
 			}
+			ctx.Logger().Info(
+				"GetStakerUnclaimedRewards debug",
+				"ending_period", endingPeriod,
+				"operator", keys.OperatorAddr,
+				"asset_id", keys.AssetId,
+				"epoch_info", epochInfo,
+				"starting_info", startingInfo,
+			)
 			// calculate the rewards
 			allAVSRewardsRaw, _, err := k.calculateDelegationRewards(ctx, endingPeriod, keys.OperatorAddr, keys.AssetId, &epochInfo, startingInfo)
 			if err != nil {

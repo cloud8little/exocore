@@ -45,12 +45,14 @@ func (p Precompile) DepositOrWithdraw(
 	// parse the depositTo input params
 	depositWithdrawParams, err := p.DepositWithdrawParams(ctx, method, args)
 	if err != nil {
+		ctx.Logger().Error("DepositOrWithdraw: failed to parse input params", "error", err)
 		return nil, err
 	}
 
 	// call assets keeper to perform the deposit or withdraw action
 	finalDepositAmount, err := p.assetsKeeper.PerformDepositOrWithdraw(ctx, depositWithdrawParams)
 	if err != nil {
+		ctx.Logger().Error("DepositOrWithdraw: failed to perform deposit or withdraw", "error", err)
 		return nil, err
 	}
 

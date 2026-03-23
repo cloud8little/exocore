@@ -34,6 +34,8 @@ func (k Keeper) PerformDepositOrWithdraw(
 	// check if staking asset exists
 	stakerID, assetID := assetstypes.GetStakerIDAndAssetID(params.ClientChainLzID, params.StakerAddress, params.AssetsAddress)
 	if !k.IsStakingAsset(ctx, assetID) {
+		ctx.Logger().Error("asset not found for client chain asset key", "assetAddr", hexutil.Encode(params.AssetsAddress),
+			"clientChainID", params.ClientChainLzID)
 		return sdkmath.ZeroInt(), assetstypes.ErrNoClientChainAssetKey.Wrapf(
 			"assetAddr:%s clientChainID:%v",
 			hexutil.Encode(params.AssetsAddress), params.ClientChainLzID,
@@ -42,6 +44,7 @@ func (k Keeper) PerformDepositOrWithdraw(
 
 	// even though this is unlikely to be true, guard against it.
 	if assetID == assetstypes.ImuachainAssetID {
+		ctx.Logger().Error("cannot deposit imua native asset", "assetID", assetID)
 		return sdkmath.ZeroInt(), assetstypes.ErrNoClientChainAssetKey.Wrapf(
 			"cannot deposit imua native assetID:%s", assetID,
 		)
@@ -66,6 +69,7 @@ func (k Keeper) PerformDepositOrWithdraw(
 	// update asset state of the specified staker
 	info, err := k.UpdateStakerAssetState(ctx, stakerID, assetID, changeAmount)
 	if err != nil {
+		ctx.Logger().Error("failed to update staker asset state", "stakerID", stakerID, "assetID", assetID, "error", err)
 		return sdkmath.ZeroInt(), errorsmod.Wrapf(
 			err, "stakerID:%s assetID:%s", stakerID, assetID,
 		)
@@ -74,6 +78,7 @@ func (k Keeper) PerformDepositOrWithdraw(
 	// update total amount of the deposited asset
 	err = k.UpdateStakingAssetTotalAmount(ctx, assetID, actualOpAmount)
 	if err != nil {
+		ctx.Logger().Error("failed to update staking asset total amount", "assetID", assetID, "error", err)
 		return sdkmath.ZeroInt(), errorsmod.Wrapf(err, "assetID:%s", assetID)
 	}
 
